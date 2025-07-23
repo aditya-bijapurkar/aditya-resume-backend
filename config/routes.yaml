@@ -1,0 +1,8 @@
+RequestMapping:
+  schedule: /schedule/meet
+
+Routes:
+  schedule:
+    availability: /availability
+    initiate: /initiate
+    respond: /respond
