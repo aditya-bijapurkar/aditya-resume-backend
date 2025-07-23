@@ -2,6 +2,7 @@ package com.example.aditya_resume_backend.core.service;
 
 import com.example.aditya_resume_backend.core.entity.schedule.MeetSchedule;
 import com.example.aditya_resume_backend.core.entity.schedule.MeetUserMap;
+import com.example.aditya_resume_backend.core.entity.schedule.Status;
 import com.example.aditya_resume_backend.core.entity.user.UserProfile;
 import com.example.aditya_resume_backend.core.enums.MeetPlatformEnum;
 import com.example.aditya_resume_backend.core.enums.StatusEnum;
@@ -10,6 +11,7 @@ import com.example.aditya_resume_backend.core.port.repository.schedule.MeetSched
 import com.example.aditya_resume_backend.core.port.repository.schedule.MeetUserMapRepository;
 import com.example.aditya_resume_backend.core.port.repository.schedule.StatusRepository;
 import com.example.aditya_resume_backend.core.port.service.IEmailService;
+import com.example.aditya_resume_backend.core.port.service.IMeetLinkService;
 import com.example.aditya_resume_backend.core.port.service.ISchedulerService;
 import com.example.aditya_resume_backend.core.port.service.IUserManagementService;
 import com.example.aditya_resume_backend.dto.get_availability.ScheduleAvailabilityResponse;
@@ -32,6 +34,8 @@ public class SchedulerServiceImpl implements ISchedulerService {
 
     private final IUserManagementService userManagementService;
     private final IEmailService emailService;
+    private final IMeetLinkService meetLinkService;
+
     private final MeetScheduleRepository meetScheduleRepository;
     private final MeetUserMapRepository meetUserMapRepository;
     private final StatusRepository statusRepository;
@@ -39,9 +43,11 @@ public class SchedulerServiceImpl implements ISchedulerService {
     @Autowired
     public SchedulerServiceImpl(IEmailService emailService, IUserManagementService userManagementService,
                                 MeetScheduleRepository meetScheduleRepository, MeetUserMapRepository meetUserMapRepository,
-                                StatusRepository statusRepository) {
+                                StatusRepository statusRepository, IMeetLinkService meetLinkService) {
         this.userManagementService = userManagementService;
         this.emailService = emailService;
+        this.meetLinkService = meetLinkService;
+
         this.meetScheduleRepository = meetScheduleRepository;
         this.meetUserMapRepository = meetUserMapRepository;
         this.statusRepository = statusRepository;
@@ -115,38 +121,46 @@ public class SchedulerServiceImpl implements ISchedulerService {
         );
     }
 
-    private LocalDateTime updateMeetingStatus(UUID meetingId, String response, String meetingLink) {
+    private LocalDateTime getMeetScheduledTime(UUID meetingId) {
         Optional<MeetSchedule> meetSchedule = meetScheduleRepository.findById(meetingId);
-
         if(meetSchedule.isPresent()) {
             MeetSchedule meeting = meetSchedule.get();
-
-            meeting.setStatus(statusRepository.findByTitle(StatusEnum.getEnumFromString(response).value));
-            if(meetingLink != null && !meetingLink.isEmpty()) {
-                meeting.setMeetLink(meetingLink);
-            }
-
-            meetScheduleRepository.save(meeting);
-
             return meeting.getScheduledAt();
         }
-        else {
-            throw new GenericRuntimeException(String.format("Meeting Id %s not found", meetingId));
+
+        throw new GenericRuntimeException(String.format("Meeting Id %s not found", meetingId));
+    }
+
+    private void updateMeetingStatus(UUID meetingId, String response, String meetingLink) {
+        Optional<MeetSchedule> meetSchedule = meetScheduleRepository.findById(meetingId);
+        if(meetSchedule.isPresent()) {
+            MeetSchedule meeting = meetSchedule.get();
+            Status updatedStatus = statusRepository.findByTitle(StatusEnum.getEnumFromString(response).value);
+            if(meeting.getStatus().equals(updatedStatus)) {
+               throw new GenericRuntimeException(String.format("Meeting already in status: %s", updatedStatus));
+            }
+
+            meeting.setStatus(updatedStatus);
+            meeting.setMeetLink(meetingLink);
+            meetScheduleRepository.save(meeting);
         }
+
+        throw new GenericRuntimeException(String.format("Meeting Id %s not found", meetingId));
     }
 
     @Override
     public void acceptMeetingRequest(UUID meetingId, String response) throws TemplateException, MessagingException, IOException {
-
+        LocalDateTime scheduleTime = getMeetScheduledTime(meetingId);
         List<String> meetingUsersEmail = meetUserMapRepository.getRequiredUsersEmail(meetingId);
 
         if(response.equals(StatusEnum.SCHEDULED.value)) {
-            String meetingLink = "https://google.com";
-            LocalDateTime scheduledTime = updateMeetingStatus(meetingId, response, meetingLink);
-            emailService.sendConfirmationEmail(meetingUsersEmail, meetingLink, scheduledTime);
+            String meetingLink = meetLinkService.generateGoogleMeetingLink(scheduleTime);
+            updateMeetingStatus(meetingId, response, meetingLink);
+
+            emailService.sendConfirmationEmail(meetingUsersEmail, meetingLink, scheduleTime);
         }
         else {
-            LocalDateTime scheduleTime = updateMeetingStatus(meetingId, response, null);
+            updateMeetingStatus(meetingId, response, null);
             emailService.sendRejectionEmail(meetingUsersEmail, scheduleTime);
         }
     }
