@@ -10,8 +10,10 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -57,6 +59,7 @@ public class EmailServiceImpl implements IEmailService {
         return istTime.toLocalTime().toString();
     }
 
+    @Async
     @Override
     public void sendMeetRequestEmail(UUID meetingId, ScheduleMeetRequest scheduleMeetRequest) throws IOException, TemplateException, MessagingException {
         Template template = freemarkerConfig.getTemplate(EmailConstants.REQUEST_TEMPLATE_FILE);
@@ -84,6 +87,7 @@ public class EmailServiceImpl implements IEmailService {
         javaMailSender.send(message);
     }
 
+    @Async
     @Override
     public void sendMeetScheduleEmail(List<String> recipients, LocalDateTime scheduleTime) throws IOException, TemplateException, MessagingException {
         Template template = freemarkerConfig.getTemplate(EmailConstants.INITIATE_TEMPLATE_FILE);
@@ -106,8 +110,10 @@ public class EmailServiceImpl implements IEmailService {
         javaMailSender.send(message);
     }
 
+    @Async
     @Override
     public void sendConfirmationEmail(List<String> recipients, String meetLink, LocalDateTime scheduleTime) throws IOException, TemplateException, MessagingException {
+        recipients.add(ADMIN_EMAIL);
         Template template = freemarkerConfig.getTemplate(EmailConstants.ACCEPT_TEMPLATE_FILE);
         StringWriter writer = new StringWriter();
 
@@ -129,6 +135,7 @@ public class EmailServiceImpl implements IEmailService {
         javaMailSender.send(message);
     }
 
+    @Async
     @Override
     public void sendRejectionEmail(List<String> recipients, LocalDateTime scheduleTime) throws IOException, TemplateException, MessagingException {
         Template template = freemarkerConfig.getTemplate(EmailConstants.REJECT_TEMPLATE_FILE);
@@ -149,6 +156,18 @@ public class EmailServiceImpl implements IEmailService {
         helper.setText(htmlBody, true);
 
         javaMailSender.send(message);
+    }
+
+    @Async
+    @Override
+    public void sendSimpleMail(String toEmail, String subject, String text) {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setFrom(NO_REPLY_EMAIL);
+        mailMessage.setTo(toEmail != null ? toEmail : ADMIN_EMAIL);
+        mailMessage.setSubject(subject);
+        mailMessage.setText(text);
+
+        javaMailSender.send(mailMessage);
     }
 
 }

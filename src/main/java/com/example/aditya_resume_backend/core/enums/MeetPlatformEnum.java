@@ -6,7 +6,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum MeetPlatformEnum {
-    GOOGLE_MEET("google_meet");
+    GOOGLE_MEET("google_meet"),
+    ZOOM_MEET("zoom_meet");
 
     public final String value;
 

@@ -19,4 +19,6 @@ public interface IEmailService {
 
     void sendRejectionEmail(List<String> recipients, LocalDateTime scheduleTime) throws IOException, TemplateException, MessagingException;
 
+    void sendSimpleMail(String toEmail, String subject, String text);
+
 }

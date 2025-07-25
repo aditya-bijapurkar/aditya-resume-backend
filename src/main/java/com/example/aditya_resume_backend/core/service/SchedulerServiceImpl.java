@@ -6,6 +6,7 @@ import com.example.aditya_resume_backend.core.entity.schedule.Status;
 import com.example.aditya_resume_backend.core.entity.user.UserProfile;
 import com.example.aditya_resume_backend.core.enums.MeetPlatformEnum;
 import com.example.aditya_resume_backend.core.enums.StatusEnum;
+import com.example.aditya_resume_backend.core.port.dto.MeetingEmailsDTO;
 import com.example.aditya_resume_backend.core.port.dto.UserDTO;
 import com.example.aditya_resume_backend.core.port.repository.schedule.MeetScheduleRepository;
 import com.example.aditya_resume_backend.core.port.repository.schedule.MeetUserMapRepository;
@@ -61,7 +62,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
         LocalDateTime dayStart = date.atTime(workStart);
         LocalDateTime dayEnd = date.atTime(workEnd);
 
-        List<LocalDateTime> meetings = meetScheduleRepository.findByScheduledAtBetween(dayStart, dayEnd);
+        List<LocalDateTime> meetings = meetScheduleRepository.findByScheduledAtBetween(dayStart, dayEnd, StatusEnum.SCHEDULED.value);
         Set<LocalTime> bookedTimes = meetings.stream()
                 .map(LocalDateTime::toLocalTime)
                 .collect(Collectors.toSet());
@@ -131,36 +132,53 @@ public class SchedulerServiceImpl implements ISchedulerService {
         throw new GenericRuntimeException(String.format("Meeting Id %s not found", meetingId));
     }
 
-    private void updateMeetingStatus(UUID meetingId, String response, String meetingLink) {
-        Optional<MeetSchedule> meetSchedule = meetScheduleRepository.findById(meetingId);
-        if(meetSchedule.isPresent()) {
-            MeetSchedule meeting = meetSchedule.get();
-            Status updatedStatus = statusRepository.findByTitle(StatusEnum.getEnumFromString(response).value);
-            if(meeting.getStatus().equals(updatedStatus)) {
-               throw new GenericRuntimeException(String.format("Meeting already in status: %s", updatedStatus));
+    private void updateMeetingStatus(List<UUID> meetingIds, String response, String meetingLink) {
+        List<MeetSchedule> meetSchedules = meetScheduleRepository.findByIdIn(meetingIds);
+        Status updatedStatus = statusRepository.findByTitle(StatusEnum.getEnumFromString(response).value);
+
+        meetSchedules.forEach(schedule -> {
+            if(schedule.getStatus().equals(updatedStatus)) {
+                throw new GenericRuntimeException(String.format("Meeting already in status: %s", updatedStatus.getTitle()));
             }
 
-            meeting.setStatus(updatedStatus);
-            meeting.setMeetLink(meetingLink);
-            meetScheduleRepository.save(meeting);
-        }
+            schedule.setStatus(updatedStatus);
+            if(meetingLink != null && !meetingLink.isEmpty()) {
+                schedule.setMeetLink(meetingLink);
+            }
+        });
 
-        throw new GenericRuntimeException(String.format("Meeting Id %s not found", meetingId));
+        meetScheduleRepository.saveAll(meetSchedules);
+    }
+
+    private void rejectOtherSimilarMeets(UUID meetingId, LocalDateTime scheduledTime) throws Exception {
+        List<MeetingEmailsDTO> otherSimilarMeets = meetScheduleRepository.getOtherSimilarMeets(scheduledTime, meetingId);
+
+        updateMeetingStatus(
+                otherSimilarMeets.stream().map(MeetingEmailsDTO::getMeetingId).toList(),
+                StatusEnum.DECLINED.value,
+                null
+        );
+
+        for(MeetingEmailsDTO meetingEmails : otherSimilarMeets) {
+            List<String> emailIds = Arrays.stream(meetingEmails.getEmailIdsString().split(",")).toList();
+            emailService.sendRejectionEmail(emailIds, scheduledTime);
+        }
     }
 
     @Override
-    public void acceptMeetingRequest(UUID meetingId, String response) throws TemplateException, MessagingException, IOException {
+    public void respondToSchedule(UUID meetingId, String response) throws Exception {
         LocalDateTime scheduleTime = getMeetScheduledTime(meetingId);
         List<String> meetingUsersEmail = meetUserMapRepository.getRequiredUsersEmail(meetingId);
 
         if(response.equals(StatusEnum.SCHEDULED.value)) {
             String meetingLink = meetLinkService.generateGoogleMeetingLink(scheduleTime);
-            updateMeetingStatus(meetingId, response, meetingLink);
-
+            updateMeetingStatus(List.of(meetingId), response, meetingLink);
             emailService.sendConfirmationEmail(meetingUsersEmail, meetingLink, scheduleTime);
+
+            rejectOtherSimilarMeets(meetingId, scheduleTime);
         }
         else {
-            updateMeetingStatus(meetingId, response, null);
+            updateMeetingStatus(List.of(meetingId), response, null);
             emailService.sendRejectionEmail(meetingUsersEmail, scheduleTime);
         }
     }

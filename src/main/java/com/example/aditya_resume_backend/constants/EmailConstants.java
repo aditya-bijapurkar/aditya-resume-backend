@@ -24,4 +24,7 @@ public class EmailConstants {
     public static final String REJECT_TEMPLATE_FILE = "reject_meet_schedule.ftl";
     public static final String REJECT_SUBJECT = "Meeting schedule is rejected :(";
 
+    public static final String NEW_CONTACT_MAIL = "USER %S CONTACTED FOR: %s";
+    public static final String COPY_OF = "COPY OF: %s";
+
 }

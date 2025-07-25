@@ -1,5 +1,6 @@
 package com.example.aditya_resume_backend.controller;
 
+import com.example.aditya_resume_backend.annotations.Time;
 import com.example.aditya_resume_backend.core.port.service.ISchedulerService;
 import com.example.aditya_resume_backend.dto.ApiResponse;
 import com.example.aditya_resume_backend.dto.get_availability.ScheduleAvailabilityResponse;
@@ -34,6 +35,7 @@ public class SchedulerController {
         this.schedulerService = schedulerService;
     }
 
+    @Time(metricName = "schedule_availability", apiName = "availability")
     @GetMapping("${Routes.schedule.availability}")
     public ResponseEntity<ApiResponse<ScheduleAvailabilityResponse>> getScheduleAvailability(
             @RequestParam(name = "date") LocalDate date
@@ -48,6 +50,7 @@ public class SchedulerController {
         }
     }
 
+    @Time(metricName = "schedule_initiate", apiName = "initiate")
     @PostMapping("${Routes.schedule.initiate}")
     public ResponseEntity<ApiResponse<ScheduleMeetResponse>> initiateMeetingSchedule(
         @RequestBody ScheduleMeetRequest scheduleMeetRequest
@@ -62,13 +65,14 @@ public class SchedulerController {
         }
     }
 
+    @Time(metricName = "schedule_respond", apiName = "respond")
     @GetMapping("${Routes.schedule.respond}")
-    public ResponseEntity initiateMeetingSchedule(
+    public ResponseEntity respondToSchedule(
         @RequestParam(name = "meetingId") UUID meetingId,
         @RequestParam(name = "response") String response
     ) {
         try {
-            schedulerService.acceptMeetingRequest(meetingId, response);
+            schedulerService.respondToSchedule(meetingId, response);
             return ResponseUtils.createRedirectResponse();
         }
         catch (Exception e) {

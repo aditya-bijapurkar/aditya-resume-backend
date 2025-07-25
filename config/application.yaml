@@ -36,3 +36,6 @@ spring:
       hibernate:
         format_sql: false
         generate_statistics: false
+
+google:
+  access_key_base64: ${GOOGLE_ACCESS_KEY_BASE64}

@@ -1,5 +1,6 @@
 package com.example.aditya_resume_backend.utils;
 
+import com.example.aditya_resume_backend.constants.ApplicationConstants;
 import com.example.aditya_resume_backend.dto.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +14,6 @@ public class ResponseUtils {
         throw new IllegalStateException("Utility class");
     }
 
-    private static final String DEFAULT_REDIRECT_LOCATION = "https://google.com";
-
     public static <T> ResponseEntity<ApiResponse<T>> createApiResponse(HttpStatus httpStatus, String message, T data) {
         ApiResponse<T> response;
         if (data == null) {
@@ -27,8 +26,10 @@ public class ResponseUtils {
     }
 
     public static ResponseEntity createRedirectResponse() {
+        String defaultRedirectionLocation = System.getenv(ApplicationConstants.DEFAULT_REDIRECTION_LOCATION);
+
         return ResponseEntity.status(HttpStatus.SEE_OTHER)
-                .location(URI.create(DEFAULT_REDIRECT_LOCATION))
+                .location(URI.create(defaultRedirectionLocation))
                 .build();
     }
 

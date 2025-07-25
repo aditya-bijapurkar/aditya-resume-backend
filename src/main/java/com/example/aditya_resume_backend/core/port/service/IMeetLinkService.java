@@ -4,6 +4,6 @@ import java.time.LocalDateTime;
 
 public interface IMeetLinkService {
 
-    String generateGoogleMeetingLink(LocalDateTime dateTime);
+    String generateGoogleMeetingLink(LocalDateTime dateTime) throws Exception;
 
 }

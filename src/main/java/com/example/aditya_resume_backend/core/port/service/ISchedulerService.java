@@ -15,6 +15,6 @@ public interface ISchedulerService {
 
     void initiateMeetingRequest(ScheduleMeetRequest scheduleMeetRequest) throws TemplateException, MessagingException, IOException;
 
-    void acceptMeetingRequest(UUID meetingId, String response) throws TemplateException, MessagingException, IOException;
+    void respondToSchedule(UUID meetingId, String response) throws Exception;
 
 }
