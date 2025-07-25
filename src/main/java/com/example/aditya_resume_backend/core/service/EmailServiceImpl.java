@@ -1,6 +1,7 @@
 package com.example.aditya_resume_backend.core.service;
 
 import com.example.aditya_resume_backend.constants.EmailConstants;
+import com.example.aditya_resume_backend.core.port.dto.NameEmailDTO;
 import com.example.aditya_resume_backend.core.port.service.IEmailService;
 import com.example.aditya_resume_backend.dto.initiate_meet.ScheduleMeetRequest;
 import freemarker.template.Configuration;
@@ -23,6 +24,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -112,13 +114,18 @@ public class EmailServiceImpl implements IEmailService {
 
     @Async
     @Override
-    public void sendConfirmationEmail(List<String> recipients, String meetLink, LocalDateTime scheduleTime) throws IOException, TemplateException, MessagingException {
-        recipients.add(ADMIN_EMAIL);
+    public void sendConfirmationEmail(List<NameEmailDTO> recipients, String meetLink, LocalDateTime scheduleTime) throws IOException, TemplateException, MessagingException {
+        recipients.add(NameEmailDTO.builder().emailId(ADMIN_EMAIL).build());
+
+        List<String> recipientsEmails = recipients.stream().map(NameEmailDTO::getEmailId).toList();
+        List<String> recipientsNames = recipients.stream().map(NameEmailDTO::getFirstName).toList();
+
         Template template = freemarkerConfig.getTemplate(EmailConstants.ACCEPT_TEMPLATE_FILE);
         StringWriter writer = new StringWriter();
 
         Map<String, Object> model = Map.of(
                 "meeting_link", meetLink,
+                "participants", recipientsNames.stream().filter(Objects::nonNull).collect(Collectors.joining(",")),
                 EmailConstants.SCHEDULE_DATE, getDateString(scheduleTime),
                 EmailConstants.SCHEDULE_TIME, getTimeString(scheduleTime)
         );
@@ -128,7 +135,7 @@ public class EmailServiceImpl implements IEmailService {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, EmailConstants.DEFAULT_ENCODING);
         helper.setFrom(NO_REPLY_EMAIL);
-        helper.setTo(recipients.toArray(new String[0]));
+        helper.setTo(recipientsEmails.toArray(new String[0]));
         helper.setSubject(EmailConstants.ACCEPT_SUBJECT);
         helper.setText(htmlBody, true);
 

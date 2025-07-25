@@ -7,6 +7,7 @@ import com.example.aditya_resume_backend.core.entity.user.UserProfile;
 import com.example.aditya_resume_backend.core.enums.MeetPlatformEnum;
 import com.example.aditya_resume_backend.core.enums.StatusEnum;
 import com.example.aditya_resume_backend.core.port.dto.MeetingEmailsDTO;
+import com.example.aditya_resume_backend.core.port.dto.NameEmailDTO;
 import com.example.aditya_resume_backend.core.port.dto.UserDTO;
 import com.example.aditya_resume_backend.core.port.repository.schedule.MeetScheduleRepository;
 import com.example.aditya_resume_backend.core.port.repository.schedule.MeetUserMapRepository;
@@ -168,7 +169,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
     @Override
     public void respondToSchedule(UUID meetingId, String response) throws Exception {
         LocalDateTime scheduleTime = getMeetScheduledTime(meetingId);
-        List<String> meetingUsersEmail = meetUserMapRepository.getRequiredUsersEmail(meetingId);
+        List<NameEmailDTO> meetingUsersEmail = meetUserMapRepository.getRequiredUsersEmail(meetingId);
 
         if(response.equals(StatusEnum.SCHEDULED.value)) {
             String meetingLink = meetLinkService.generateGoogleMeetingLink(scheduleTime);
@@ -179,7 +180,10 @@ public class SchedulerServiceImpl implements ISchedulerService {
         }
         else {
             updateMeetingStatus(List.of(meetingId), response, null);
-            emailService.sendRejectionEmail(meetingUsersEmail, scheduleTime);
+            emailService.sendRejectionEmail(
+                    meetingUsersEmail.stream().map(NameEmailDTO::getEmailId).toList(),
+                    scheduleTime
+            );
         }
     }
 
