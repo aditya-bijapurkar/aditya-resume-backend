@@ -3,6 +3,21 @@ spring:
     location: conf/
     name: application, routes
 
+  endpoints:
+    web:
+      exposure:
+        include: loggers, health, prometheus, metrics
+    health:
+      probes:
+        enabled: true
+  loggers:
+    enabled: true
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+
   mail:
     host: email-smtp.ap-south-1.amazonaws.com
     port: 587
