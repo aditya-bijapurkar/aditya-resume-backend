@@ -14,6 +14,7 @@ import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueResponse;
 
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -115,6 +116,7 @@ public class AwsSecretsManagerInitializer implements ApplicationContextInitializ
                     java.io.File storedCredentialFile = new java.io.File(tokensDir, STORED_CREDENTIAL_FILE);
                     try (java.io.FileOutputStream fos = new java.io.FileOutputStream(storedCredentialFile)) {
                         fos.write(storedCredentialBytes);
+                        logger.info("saving this to token {}", Arrays.toString(storedCredentialBytes));
                     }
                     
                     logger.info("Created StoredCredential file from base64-encoded serialized HashMap ({} bytes)", storedCredentialBytes.length);
