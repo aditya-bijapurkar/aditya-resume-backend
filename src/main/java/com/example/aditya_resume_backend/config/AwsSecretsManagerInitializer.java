@@ -85,7 +85,6 @@ public class AwsSecretsManagerInitializer implements ApplicationContextInitializ
             MapPropertySource propertySource = new MapPropertySource(AWS_SECRETS_PROPERTY_SOURCE, properties);
             environment.getPropertySources().addFirst(propertySource);
             
-            // Create tokens folder and files
             createTokensFolder(secretJson);
             
             logger.info("Added {} properties from AWS Secrets Manager", properties.size());
@@ -106,14 +105,22 @@ public class AwsSecretsManagerInitializer implements ApplicationContextInitializ
 
             if (secretJson.has(STORED_CREDENTIAL_BASE64_KEY)) {
                 String storedCredentialBase64 = secretJson.get(STORED_CREDENTIAL_BASE64_KEY).asText();
-                byte[] storedCredentialBytes = Base64.getDecoder().decode(storedCredentialBase64);
                 
-                java.io.File storedCredentialFile = new java.io.File(tokensDir, STORED_CREDENTIAL_FILE);
-                try (java.io.FileOutputStream fos = new java.io.FileOutputStream(storedCredentialFile)) {
-                    fos.write(storedCredentialBytes);
+                storedCredentialBase64 = storedCredentialBase64.trim().replaceAll("\\s+", "");
+                
+                try {
+                    byte[] storedCredentialBytes = Base64.getDecoder().decode(storedCredentialBase64);
+                    
+                    java.io.File storedCredentialFile = new java.io.File(tokensDir, STORED_CREDENTIAL_FILE);
+                    try (java.io.FileOutputStream fos = new java.io.FileOutputStream(storedCredentialFile)) {
+                        fos.write(storedCredentialBytes);
+                    }
+                    
+                    logger.info("Created StoredCredential file from base64-encoded serialized HashMap ({} bytes)", storedCredentialBytes.length);
+                } catch (IllegalArgumentException e) {
+                    logger.error("Failed to decode base64 StoredCredential content: {}", e.getMessage());
+                    throw new RuntimeException("Invalid base64 encoding for StoredCredential", e);
                 }
-                
-                logger.info("Created StoredCredential file from secrets");
             }
             
         } catch (Exception e) {
