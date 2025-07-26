@@ -53,8 +53,8 @@ public class MeetLinkServiceImpl implements IMeetLinkService {
                 JSON_FACTORY,
                 new AuthorizationCodeInstalledApp(flow,
                         new LocalServerReceiver.Builder()
-                                .setPort(8080)
-                                .setHost("0.0.0.0")
+                                .setPort(8888)
+                                .setHost("ec2-13-233-192-71.ap-south-1.compute.amazonaws.com")
                                 .build())
                         .authorize("user")
         ).setApplicationName(ApplicationConstants.APPLICATION_NAME).build();
