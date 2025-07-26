@@ -9,6 +9,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.WebIdentityTokenFileCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
@@ -60,7 +61,7 @@ public class AwsSecretsManagerInitializer implements ApplicationContextInitializ
             
             SecretsManagerClient client = SecretsManagerClient.builder()
                     .region(Region.of(region))
-                    .credentialsProvider(DefaultCredentialsProvider.create())
+                    .credentialsProvider(WebIdentityTokenFileCredentialsProvider.create())
                     .build();
 
             GetSecretValueRequest getSecretValueRequest = GetSecretValueRequest.builder()
