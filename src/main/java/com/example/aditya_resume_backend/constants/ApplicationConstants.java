@@ -6,7 +6,7 @@ public class ApplicationConstants {
         throw new IllegalStateException("Utility class");
     }
 
-    public static final String DEFAULT_REDIRECTION_LOCATION = "DEFAULT_REDIRECTION_LOCATION";
+    public static final String DEFAULT_REDIRECTION_LOCATION = "https://adityabijapurkar.in";
 
     public static final String CALENDAR_ID = "primary";
     public static final String MEET_TYPE = "hangoutsMeet";

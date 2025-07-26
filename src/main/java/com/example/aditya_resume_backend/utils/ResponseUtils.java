@@ -26,7 +26,7 @@ public class ResponseUtils {
     }
 
     public static ResponseEntity createRedirectResponse() {
-        String defaultRedirectionLocation = System.getenv(ApplicationConstants.DEFAULT_REDIRECTION_LOCATION);
+        String defaultRedirectionLocation = ApplicationConstants.DEFAULT_REDIRECTION_LOCATION;
 
         return ResponseEntity.status(HttpStatus.SEE_OTHER)
                 .location(URI.create(defaultRedirectionLocation))

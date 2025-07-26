@@ -1,11 +1,15 @@
 spring:
+  config:
+    location: conf/
+    name: application, routes
+
   mail:
-    host: ${SMTP_HOST}
-    port: ${SMTP_PORT}
-    username: ${SMTP_USERNAME}
+    host: email-smtp.ap-south-1.amazonaws.com
+    port: 587
+    username: AKIATCKANRXLHTVDDCFV
     password: ${SMTP_PASSWORD}
-    noreply-email: ${NOREPLY_EMAIL}
-    admin-email: ${ADMIN_EMAIL}
+    noreply-email: noreply@adityabijapurkar.in
+    admin-email: adityabijapurkar@gmail.com
     properties:
       mail:
         smtp:
@@ -19,16 +23,15 @@ spring:
       default-encoding: UTF-8
 
   datasource:
-    env: ${ENV}
-    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?${SSL_MODE}
-    username: ${DB_USER}
+    url: jdbc:postgresql://localhost:5432/aditya_resume_schedule
+    username: dbuser
     password: ${DB_PASSWORD}
     hikari:
-      maximum-pool-size: ${DB_POOL_SIZE:10}
-      minimum-idle: ${DB_MIN_IDLE_CONN:1}
-      connection-timeout: ${DB_CONN_TIMEOUT:30000}
-      idle-timeout: ${DB_IDLE_TIMEOUT:600000}
-      max-lifetime: ${DB_MAX_LIFETIME:1800000}
+      maximum-pool-size: 10
+      minimum-idle: 1
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
       pool-name: Application-Hikari-Pool
   jpa:
     show-sql: false
@@ -36,6 +39,10 @@ spring:
       hibernate:
         format_sql: false
         generate_statistics: false
+
+aws:
+  secret-name: aditya-resume-backend-secrets
+  region: ap-south-1
 
 google:
   access_key_base64: ${GOOGLE_ACCESS_KEY_BASE64}
