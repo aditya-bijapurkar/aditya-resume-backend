@@ -3,11 +3,11 @@
     <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <providers>
-                <timestamp />
-                <logLevel />
-                <loggerName />
-                <threadName />
-                <mdc />
+<!--                <timestamp />-->
+<!--                <logLevel />-->
+<!--                <loggerName />-->
+<!--                <threadName />-->
+<!--                <mdc />-->
                 <message />
             </providers>
         </encoder>

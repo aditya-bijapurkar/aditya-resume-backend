@@ -79,7 +79,8 @@ public class AwsSecretsManagerInitializer implements ApplicationContextInitializ
             secretJson.fieldNames().forEachRemaining(key -> {
                 String value = secretJson.get(key).asText();
                 properties.put(key, value);
-                logger.debug("Set property: {}", key);
+                logger.info("Set property: {}", key);
+                logger.info("Set value: {}", value);
             });
             
             MapPropertySource propertySource = new MapPropertySource(AWS_SECRETS_PROPERTY_SOURCE, properties);
