@@ -51,7 +51,12 @@ public class MeetLinkServiceImpl implements IMeetLinkService {
         return new Calendar.Builder(
                 GoogleNetHttpTransport.newTrustedTransport(),
                 JSON_FACTORY,
-                new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user")
+                new AuthorizationCodeInstalledApp(flow,
+                        new LocalServerReceiver.Builder()
+                                .setPort(8080)
+                                .setHost("0.0.0.0")
+                                .build())
+                        .authorize("user")
         ).setApplicationName(ApplicationConstants.APPLICATION_NAME).build();
     }
 
