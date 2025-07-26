@@ -9,7 +9,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
-import software.amazon.awssdk.auth.credentials.WebIdentityTokenFileCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
@@ -58,10 +57,11 @@ public class AwsSecretsManagerInitializer implements ApplicationContextInitializ
             String region = environment.getProperty(AWS_REGION_PROPERTY, DEFAULT_REGION);
             
             logger.info("Loading secrets from AWS Secrets Manager: {} in region: {}", secretName, region);
+            logger.info("Using DefaultCredentialsProvider for EC2 instance authentication");
             
             SecretsManagerClient client = SecretsManagerClient.builder()
                     .region(Region.of(region))
-                    .credentialsProvider(WebIdentityTokenFileCredentialsProvider.create())
+                    .credentialsProvider(DefaultCredentialsProvider.create())
                     .build();
 
             GetSecretValueRequest getSecretValueRequest = GetSecretValueRequest.builder()
@@ -141,6 +141,17 @@ public class AwsSecretsManagerInitializer implements ApplicationContextInitializ
 
         } catch (Exception e) {
             logger.error("Failed to load secrets from AWS Secrets Manager", e);
+            logger.error("Exception type: {}", e.getClass().getSimpleName());
+            logger.error("Exception message: {}", e.getMessage());
+            
+            // Check if it's an authentication issue
+            if (e.getMessage() != null && e.getMessage().contains("Unable to load credentials")) {
+                logger.error("This appears to be a credentials issue. Please ensure:");
+                logger.error("1. EC2 instance has an IAM role attached with Secrets Manager permissions");
+                logger.error("2. IAM role has 'secretsmanager:GetSecretValue' permission for the secret");
+                logger.error("3. IAM role has 'kms:Decrypt' permission if the secret is encrypted with a custom KMS key");
+            }
+            
             throw new RuntimeException("Failed to initialize AWS Secrets Manager", e);
         }
     }
