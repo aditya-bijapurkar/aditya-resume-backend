@@ -80,12 +80,39 @@ public class AwsSecretsManagerInitializer implements ApplicationContextInitializ
             secretJson.fieldNames().forEachRemaining(key -> {
                 String value = secretJson.get(key).asText();
                 properties.put(key, value);
+                // Also set as system environment variable
+                System.setProperty(key, value);
                 logger.info("Set property: {}", key);
                 logger.info("Set value: {}", value);
+                logger.info("Set system property: {} = {}", key, key.contains("PASSWORD") ? "***MASKED***" : value);
             });
             
             MapPropertySource propertySource = new MapPropertySource(AWS_SECRETS_PROPERTY_SOURCE, properties);
             environment.getPropertySources().addFirst(propertySource);
+            
+            // Debug: Show property source order
+            logger.info("Property source order after adding AWS secrets:");
+            int i = 0;
+            for (org.springframework.core.env.PropertySource<?> source : environment.getPropertySources()) {
+                logger.info("{}: {}", i++, source.getName());
+            }
+            
+            // Debug: Check if properties are accessible
+            logger.info("Testing property access after adding to environment:");
+            for (String key : properties.keySet()) {
+                String envValue = environment.getProperty(key);
+                String sysValue = System.getProperty(key);
+                logger.info("Property '{}' - Environment: {}, System: {}", 
+                    key, 
+                    envValue != null ? "YES" : "NO",
+                    sysValue != null ? "YES" : "NO");
+                if (envValue != null) {
+                    logger.info("Property '{}' env value: {}", key, key.contains("PASSWORD") ? "***MASKED***" : envValue);
+                }
+                if (sysValue != null) {
+                    logger.info("Property '{}' sys value: {}", key, key.contains("PASSWORD") ? "***MASKED***" : sysValue);
+                }
+            }
             
             createTokensFolder(secretJson);
             
