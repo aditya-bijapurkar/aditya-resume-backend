@@ -77,18 +77,22 @@ public class AwsSecretsManagerInitializer implements ApplicationContextInitializ
             JsonNode secretJson = objectMapper.readTree(secret);
             Map<String, Object> properties = new HashMap<>();
             
+            logger.info("Processing secrets from AWS Secrets Manager...");
             secretJson.fieldNames().forEachRemaining(key -> {
                 String value = secretJson.get(key).asText();
                 properties.put(key, value);
-                // Also set as system environment variable
+                
+                // Set as system property FIRST (before Spring environment)
                 System.setProperty(key, value);
-                logger.info("Set property: {}", key);
-                logger.info("Set value: {}", value);
+                String s = System.getenv(key);
+                logger.info("System env seT!!!: {} = {}", key, s);
                 logger.info("Set system property: {} = {}", key, key.contains("PASSWORD") ? "***MASKED***" : value);
             });
             
+            // Now add to Spring environment
             MapPropertySource propertySource = new MapPropertySource(AWS_SECRETS_PROPERTY_SOURCE, properties);
             environment.getPropertySources().addFirst(propertySource);
+            logger.info("Added {} properties to Spring environment", properties.size());
             
             // Debug: Show property source order
             logger.info("Property source order after adding AWS secrets:");
@@ -102,6 +106,7 @@ public class AwsSecretsManagerInitializer implements ApplicationContextInitializ
             for (String key : properties.keySet()) {
                 String envValue = environment.getProperty(key);
                 String sysValue = System.getProperty(key);
+                
                 logger.info("Property '{}' - Environment: {}, System: {}", 
                     key, 
                     envValue != null ? "YES" : "NO",
@@ -114,13 +119,28 @@ public class AwsSecretsManagerInitializer implements ApplicationContextInitializ
                 }
             }
             
+            String dbPasswordFromEnv = environment.getProperty("DB_PASSWORD");
+            String dbPasswordFromSys = System.getProperty("DB_PASSWORD");
+            String dbPasswordFromSysEnv = System.getenv("DB_PASSWORD");
+            logger.info("DB_PASSWORD resolution test:");
+            logger.info("  From Spring Environment: {}", dbPasswordFromEnv != null ? "FOUND" : "NOT FOUND");
+            logger.info("  From System Properties: {}", dbPasswordFromSys != null ? "FOUND" : "NOT FOUND");
+            logger.info("  From System Environment: {}", dbPasswordFromSysEnv != null ? "FOUND" : "NOT FOUND");
+            if (dbPasswordFromEnv != null) {
+                logger.info("  DB_PASSWORD value (env): ***MASKED***");
+            }
+            if (dbPasswordFromSys != null) {
+                logger.info("  DB_PASSWORD value (sys): ***MASKED***");
+            }
+            
             createTokensFolder(secretJson);
             
-            logger.info("Added {} properties from AWS Secrets Manager", properties.size());
+            logger.info("AWS Secrets Manager initialization completed successfully");
             client.close();
 
         } catch (Exception e) {
             logger.error("Failed to load secrets from AWS Secrets Manager", e);
+            throw new RuntimeException("Failed to initialize AWS Secrets Manager", e);
         }
     }
     
