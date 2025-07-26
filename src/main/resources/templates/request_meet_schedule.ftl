@@ -5,12 +5,12 @@
     <p>Agenda of the meeting: ${description}</p>
     <p>Schedule requested on ${schedule_date}, ${schedule_time} IST</p>
     <p>
-      <a href="http://localhost:8080/schedule/meet/respond?meetingId=${meeting_id}&response=scheduled">
+      <a href="https://adityabijapurkar.in/schedule/meet/respond?meetingId=${meeting_id}&response=scheduled">
         Click here to Accept
       </a>
     </p>
     <p>
-      <a href="http://localhost:8080/schedule/meet/respond?meetingId=${meeting_id}&response=declined">
+      <a href="https://adityabijapurkar.in/schedule/meet/respond?meetingId=${meeting_id}&response=declined">
         Click here to Reject
       </a>
     </p>
