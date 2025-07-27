@@ -57,7 +57,7 @@ public class EmailServiceImpl implements IEmailService {
 
     private String getTimeString(LocalDateTime scheduleTime) {
         ZoneId istZone = ZoneId.of(EmailConstants.IST);
-        ZonedDateTime istTime = scheduleTime.atZone(ZoneId.systemDefault()).withZoneSameInstant(istZone);
+        ZonedDateTime istTime = scheduleTime.atZone(istZone);
         return istTime.toLocalTime().toString();
     }
 
