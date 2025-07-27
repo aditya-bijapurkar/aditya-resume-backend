@@ -53,25 +53,26 @@ public class MeetLinkServiceImpl implements IMeetLinkService {
                 JSON_FACTORY,
                 new AuthorizationCodeInstalledApp(flow,
                         new LocalServerReceiver.Builder()
-                                .setPort(8888)
-                                .setHost("ec2-13-233-192-71.ap-south-1.compute.amazonaws.com")
+                                .setPort(ApplicationConstants.CALLBACK_PORT)
+                                .setHost(ApplicationConstants.EC2_PUBLIC_DNS)
                                 .build())
-                        .authorize("user")
+                        .authorize(ApplicationConstants.USER)
         ).setApplicationName(ApplicationConstants.APPLICATION_NAME).build();
     }
 
     @Override
     public String generateGoogleMeetingLink(LocalDateTime dateTime) throws Exception {
         Calendar service = getCalendarService();
+        ZoneId ist = ZoneId.of(EmailConstants.IST);
 
         Event event = new Event().setSummary(ApplicationConstants.DEFAULT_MEET_SUMMARY);
 
         EventDateTime start = new EventDateTime()
-                .setDateTime(new com.google.api.client.util.DateTime(Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant())))
+                .setDateTime(new com.google.api.client.util.DateTime(Date.from(dateTime.atZone(ist).toInstant())))
                 .setTimeZone(EmailConstants.IST);
 
         EventDateTime end = new EventDateTime()
-                .setDateTime(new com.google.api.client.util.DateTime(Date.from(dateTime.plusHours(1).atZone(ZoneId.systemDefault()).toInstant())))
+                .setDateTime(new com.google.api.client.util.DateTime(Date.from(dateTime.plusHours(1).atZone(ist).toInstant())))
                 .setTimeZone(EmailConstants.IST);
 
         event.setStart(start);
@@ -93,7 +94,7 @@ public class MeetLinkServiceImpl implements IMeetLinkService {
 
         if (meetLink == null && createdEvent.getConferenceData() != null) {
             meetLink = createdEvent.getConferenceData().getEntryPoints().stream()
-                    .filter(e -> "video".equals(e.getEntryPointType()))
+                    .filter(e -> ApplicationConstants.VIDEO.equals(e.getEntryPointType()))
                     .map(EntryPoint::getUri)
                     .findFirst()
                     .orElse(null);
