@@ -30,7 +30,7 @@ public class MeetLinkServiceImpl implements IMeetLinkService {
     private String GOOGLE_ACCESS_KEY_BASE64;
 
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-    private static final String TOKENS_DIR = "tokens";
+    private static final String TOKENS_DIR = "/tokens";
     private static final List<String> SCOPES = List.of("https://www.googleapis.com/auth/calendar.events");
 
     private Calendar getCalendarService() throws Exception {
