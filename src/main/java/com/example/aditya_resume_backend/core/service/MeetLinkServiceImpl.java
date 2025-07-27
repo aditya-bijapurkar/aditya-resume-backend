@@ -46,6 +46,7 @@ public class MeetLinkServiceImpl implements IMeetLinkService {
                 SCOPES
         ).setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIR)))
                 .setAccessType("offline")
+                .setApprovalPrompt("force")
                 .build();
 
         return new Calendar.Builder(
