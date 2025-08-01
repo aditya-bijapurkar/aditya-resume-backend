@@ -61,7 +61,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
     @Override
     public ScheduleAvailabilityResponse getAvailableSlots(LocalDate date) {
         LocalTime workStart = date.equals(ZonedDateTime.now(ZoneId.of(ApplicationConstants.IST)).toLocalDate())
-                ? LocalTime.of(ZonedDateTime.now(ZoneId.of(ApplicationConstants.IST)).plusHours(1).getHour(), 0)
+                ? LocalTime.of(Math.max(ZonedDateTime.now(ZoneId.of(ApplicationConstants.IST)).plusHours(1).getHour(), ApplicationConstants.WORK_START_TIME), 0)
                 : LocalTime.of(ApplicationConstants.WORK_START_TIME, 0);
         LocalTime workEnd = LocalTime.of(ApplicationConstants.WORK_END_TIME, 0);
 
