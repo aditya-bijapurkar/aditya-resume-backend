@@ -17,7 +17,7 @@ spring:
   mail:
     host: email-smtp.ap-south-1.amazonaws.com
     port: 587
-    username: AKIATCKANRXLHTVDDCFV
+    username: ${SMTP_USERNAME}
     password: ${SMTP_PASSWORD}
     noreply-email: noreply@adityabijapurkar.in
     admin-email: adityabijapurkar@gmail.com
