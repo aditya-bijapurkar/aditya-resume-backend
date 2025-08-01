@@ -1,5 +1,6 @@
 package com.example.aditya_resume_backend.core.service;
 
+import com.example.aditya_resume_backend.constants.ApplicationConstants;
 import com.example.aditya_resume_backend.core.entity.schedule.MeetSchedule;
 import com.example.aditya_resume_backend.core.entity.schedule.MeetUserMap;
 import com.example.aditya_resume_backend.core.entity.schedule.Status;
@@ -28,6 +29,8 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -57,8 +60,10 @@ public class SchedulerServiceImpl implements ISchedulerService {
 
     @Override
     public ScheduleAvailabilityResponse getAvailableSlots(LocalDate date) {
-        LocalTime workStart = LocalTime.of(9, 0);
-        LocalTime workEnd = LocalTime.of(18, 0);
+        LocalTime workStart = date.equals(ZonedDateTime.now(ZoneId.of(ApplicationConstants.IST)).toLocalDate())
+                ? LocalTime.of(ZonedDateTime.now(ZoneId.of(ApplicationConstants.IST)).plusHours(1).getHour(), 0)
+                : LocalTime.of(ApplicationConstants.WORK_START_TIME, 0);
+        LocalTime workEnd = LocalTime.of(ApplicationConstants.WORK_END_TIME, 0);
 
         LocalDateTime dayStart = date.atTime(workStart);
         LocalDateTime dayEnd = date.atTime(workEnd);

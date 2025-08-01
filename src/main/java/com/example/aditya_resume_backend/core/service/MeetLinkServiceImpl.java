@@ -1,7 +1,6 @@
 package com.example.aditya_resume_backend.core.service;
 
 import com.example.aditya_resume_backend.constants.ApplicationConstants;
-import com.example.aditya_resume_backend.constants.EmailConstants;
 import com.example.aditya_resume_backend.core.port.service.IMeetLinkService;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -64,17 +63,17 @@ public class MeetLinkServiceImpl implements IMeetLinkService {
     @Override
     public String generateGoogleMeetingLink(LocalDateTime dateTime) throws Exception {
         Calendar service = getCalendarService();
-        ZoneId ist = ZoneId.of(EmailConstants.IST);
+        ZoneId ist = ZoneId.of(ApplicationConstants.IST);
 
         Event event = new Event().setSummary(ApplicationConstants.DEFAULT_MEET_SUMMARY);
 
         EventDateTime start = new EventDateTime()
                 .setDateTime(new com.google.api.client.util.DateTime(Date.from(dateTime.atZone(ist).toInstant())))
-                .setTimeZone(EmailConstants.IST);
+                .setTimeZone(ApplicationConstants.IST);
 
         EventDateTime end = new EventDateTime()
                 .setDateTime(new com.google.api.client.util.DateTime(Date.from(dateTime.plusHours(1).atZone(ist).toInstant())))
-                .setTimeZone(EmailConstants.IST);
+                .setTimeZone(ApplicationConstants.IST);
 
         event.setStart(start);
         event.setEnd(end);

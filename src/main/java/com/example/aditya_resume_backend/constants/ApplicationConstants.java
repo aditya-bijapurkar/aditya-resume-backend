@@ -6,6 +6,10 @@ public class ApplicationConstants {
         throw new IllegalStateException("Utility class");
     }
 
+    public static final String IST = "Asia/Kolkata";
+    public static final Integer WORK_START_TIME = 9;
+    public static final Integer WORK_END_TIME = 18;
+
     public static final String DEFAULT_REDIRECTION_LOCATION = "https://adityabijapurkar.in";
 
     public static final String EC2_PUBLIC_DNS = "ec2-13-233-192-71.ap-south-1.compute.amazonaws.com";

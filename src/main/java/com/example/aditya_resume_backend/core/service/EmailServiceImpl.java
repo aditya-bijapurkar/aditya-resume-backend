@@ -1,5 +1,6 @@
 package com.example.aditya_resume_backend.core.service;
 
+import com.example.aditya_resume_backend.constants.ApplicationConstants;
 import com.example.aditya_resume_backend.constants.EmailConstants;
 import com.example.aditya_resume_backend.core.port.dto.NameEmailDTO;
 import com.example.aditya_resume_backend.core.port.service.IEmailService;
@@ -56,7 +57,7 @@ public class EmailServiceImpl implements IEmailService {
     }
 
     private String getTimeString(LocalDateTime scheduleTime) {
-        ZoneId istZone = ZoneId.of(EmailConstants.IST);
+        ZoneId istZone = ZoneId.of(ApplicationConstants.IST);
         ZonedDateTime istTime = scheduleTime.atZone(istZone);
         return istTime.toLocalTime().toString();
     }

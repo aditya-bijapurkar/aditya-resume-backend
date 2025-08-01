@@ -7,7 +7,6 @@ public class EmailConstants {
     }
 
     public static final String DEFAULT_ENCODING = "UTF-8";
-    public static final String IST = "Asia/Kolkata";
 
     public static final String SCHEDULE_TIME = "schedule_time";
     public static final String SCHEDULE_DATE = "schedule_date";

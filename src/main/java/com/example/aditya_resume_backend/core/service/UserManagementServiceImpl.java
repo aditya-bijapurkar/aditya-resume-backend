@@ -1,5 +1,6 @@
 package com.example.aditya_resume_backend.core.service;
 
+import com.example.aditya_resume_backend.constants.ApplicationConstants;
 import com.example.aditya_resume_backend.core.entity.user.UserProfile;
 import com.example.aditya_resume_backend.core.port.dto.UserDTO;
 import com.example.aditya_resume_backend.core.port.repository.user.UserProfileRepository;
@@ -7,7 +8,8 @@ import com.example.aditya_resume_backend.core.port.service.IUserManagementServic
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 @Service
@@ -37,7 +39,7 @@ public class UserManagementServiceImpl implements IUserManagementService {
                                 .firstName(userDetail.getFirstName())
                                 .lastName(userDetail.getLastName())
                                 .emailId(userDetail.getEmailId())
-                                .createdAt(LocalDateTime.now())
+                                .createdAt(ZonedDateTime.now(ZoneId.of(ApplicationConstants.IST)).toLocalDateTime())
                                 .build()
                 );
             }
