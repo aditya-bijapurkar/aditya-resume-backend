@@ -40,6 +40,7 @@ jobs:
             DB_PORT=${{ secrets.DB_PORT }}
             DB_USER=${{ secrets.DB_USER }}
             GOOGLE_ACCESS_KEY_BASE64=${{ secrets.GOOGLE_ACCESS_KEY_BASE64 }}
+            GOOGLE_RECAPTCHA_V3_SECRET_KEY=${{ secrets.GOOGLE_RECAPTCHA_V3_SECRET_KEY }}
             SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
             SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}
             EOF"

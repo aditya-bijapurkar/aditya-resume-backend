@@ -9,4 +9,8 @@ public class ControllerConstants {
     public static final String SUCCESS = "Success";
     public static final String FAILED = "Failed";
 
+    public static final String X_RECAPTCHA_V3_TOKEN = "x-recaptcha-v3-token";
+    public static final String RECAPTCHA_VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
+    public static final Double RECAPTCHA_VERIFY_SCORE = 0.5;
+
 }

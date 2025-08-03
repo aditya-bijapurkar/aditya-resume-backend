@@ -5,7 +5,6 @@ import com.example.aditya_resume_backend.core.port.service.ISchedulerService;
 import com.example.aditya_resume_backend.dto.ApiResponse;
 import com.example.aditya_resume_backend.dto.get_availability.ScheduleAvailabilityResponse;
 import com.example.aditya_resume_backend.dto.initiate_meet.ScheduleMeetRequest;
-import com.example.aditya_resume_backend.dto.initiate_meet.ScheduleMeetResponse;
 import com.example.aditya_resume_backend.utils.ResponseUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +51,7 @@ public class SchedulerController {
 
     @Time(metricName = "schedule_initiate", apiName = "initiate")
     @PostMapping("${Routes.schedule.initiate}")
-    public ResponseEntity<ApiResponse<ScheduleMeetResponse>> initiateMeetingSchedule(
+    public ResponseEntity<ApiResponse<Boolean>> initiateMeetingSchedule(
         @RequestBody ScheduleMeetRequest scheduleMeetRequest
     ) {
         try {

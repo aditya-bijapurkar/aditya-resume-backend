@@ -57,7 +57,8 @@ aws:
 
 google:
   access_key_base64: ${GOOGLE_ACCESS_KEY_BASE64}
-
+  recaptcha_v3:
+    secret_key: ${GOOGLE_RECAPTCHA_V3_SECRET_KEY}
 
 
 ###### API ROUTES ######
