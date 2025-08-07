@@ -65,6 +65,7 @@ google:
 RequestMapping:
   schedule: /schedule/meet
   contact: /contact
+  chat: /chat
 
 Routes:
   schedule:
@@ -74,3 +75,6 @@ Routes:
 
   contact:
     send: /send
+
+  chat:
+    response: /response
