@@ -61,6 +61,8 @@ web:
   redirection_location: ${DEFAULT_REDIRECTION_LOCATION}
 
 google:
+  tokens_dir: /tokens
+  calendar_event_scope: https://www.googleapis.com/auth/calendar.events
   access_key_base64: ${GOOGLE_ACCESS_KEY_BASE64}
   recaptcha_v3:
     secret_key: ${GOOGLE_RECAPTCHA_V3_SECRET_KEY}

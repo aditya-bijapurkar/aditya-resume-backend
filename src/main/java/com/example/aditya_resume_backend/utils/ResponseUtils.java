@@ -1,17 +1,25 @@
 package com.example.aditya_resume_backend.utils;
 
-import com.example.aditya_resume_backend.constants.ApplicationConstants;
 import com.example.aditya_resume_backend.dto.ApiResponse;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
 import java.net.URI;
 
+@Component
 public class ResponseUtils {
 
-    // utils are not instantiatable
-    private ResponseUtils() {
-        throw new IllegalStateException("Utility class");
+    @Value("${web.redirection_location}")
+    private String defaultRedirectionLocation;
+
+    private static String DEFAULT_REDIRECTION_LOCATION ;
+
+    @PostConstruct
+    public void init() {
+        DEFAULT_REDIRECTION_LOCATION = defaultRedirectionLocation;
     }
 
     public static <T> ResponseEntity<ApiResponse<T>> createApiResponse(HttpStatus httpStatus, String message, T data) {
@@ -26,10 +34,8 @@ public class ResponseUtils {
     }
 
     public static ResponseEntity createRedirectResponse() {
-        String defaultRedirectionLocation = ApplicationConstants.DEFAULT_REDIRECTION_LOCATION;
-
         return ResponseEntity.status(HttpStatus.SEE_OTHER)
-                .location(URI.create(defaultRedirectionLocation))
+                .location(URI.create(""))
                 .build();
     }
 

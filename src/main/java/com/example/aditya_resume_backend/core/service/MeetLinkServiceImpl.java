@@ -25,12 +25,18 @@ import java.util.*;
 @Service
 public class MeetLinkServiceImpl implements IMeetLinkService {
 
+    @Value("${google.calendar_event_scope}")
+    private String GOOGLE_CALENDAR_EVENT_SCOPE;
     @Value("${google.access_key_base64}")
     private String GOOGLE_ACCESS_KEY_BASE64;
+    @Value("${google.tokens_dir}")
+    private String TOKENS_DIR;
+    @Value("${aws.ec2.callback_port}")
+    private Integer EC2_CALLBACK_PORT;
+    @Value("${aws.ec2.public_dns}")
+    private String EC2_PUBLIC_DNS;
 
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-    private static final String TOKENS_DIR = "/tokens";
-    private static final List<String> SCOPES = List.of("https://www.googleapis.com/auth/calendar.events");
 
     private Calendar getCalendarService() throws Exception {
         byte[] decoded = Base64.getDecoder().decode(GOOGLE_ACCESS_KEY_BASE64);
@@ -42,10 +48,10 @@ public class MeetLinkServiceImpl implements IMeetLinkService {
                 GoogleNetHttpTransport.newTrustedTransport(),
                 JSON_FACTORY,
                 clientSecrets,
-                SCOPES
+                List.of(GOOGLE_CALENDAR_EVENT_SCOPE)
         ).setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIR)))
-                .setAccessType("offline")
-                .setApprovalPrompt("force")
+                .setAccessType(ApplicationConstants.CALENDAR_ACCESS_TYPE)
+                .setApprovalPrompt(ApplicationConstants.CALENDAR_APPROVAL_PROMPT)
                 .build();
 
         return new Calendar.Builder(
@@ -53,8 +59,8 @@ public class MeetLinkServiceImpl implements IMeetLinkService {
                 JSON_FACTORY,
                 new AuthorizationCodeInstalledApp(flow,
                         new LocalServerReceiver.Builder()
-                                .setPort(ApplicationConstants.EC2_CALLBACK_PORT)
-                                .setHost(ApplicationConstants.EC2_PUBLIC_DNS)
+                                .setPort(EC2_CALLBACK_PORT)
+                                .setHost(EC2_PUBLIC_DNS)
                                 .build())
                         .authorize(ApplicationConstants.USER)
         ).setApplicationName(ApplicationConstants.APPLICATION_NAME).build();
