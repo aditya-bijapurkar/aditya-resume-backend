@@ -53,7 +53,7 @@ public class MeetLinkServiceImpl implements IMeetLinkService {
                 JSON_FACTORY,
                 new AuthorizationCodeInstalledApp(flow,
                         new LocalServerReceiver.Builder()
-                                .setPort(ApplicationConstants.CALLBACK_PORT)
+                                .setPort(ApplicationConstants.EC2_CALLBACK_PORT)
                                 .setHost(ApplicationConstants.EC2_PUBLIC_DNS)
                                 .build())
                         .authorize(ApplicationConstants.USER)

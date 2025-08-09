@@ -52,8 +52,13 @@ spring:
         generate_statistics: false
 
 aws:
-  secret-name: aditya-resume-backend-secrets
   region: ap-south-1
+  ec2:
+    public_dns: ${EC2_PUBLIC_DNS}
+    callback_port: ${EC2_CALLBACK_PORT}
+
+web:
+  redirection_location: ${DEFAULT_REDIRECTION_LOCATION}
 
 google:
   access_key_base64: ${GOOGLE_ACCESS_KEY_BASE64}
