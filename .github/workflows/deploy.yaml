@@ -34,14 +34,25 @@ jobs:
             
             echo "writing secrets to .env-backend file"
             sudo bash -c "cat <<EOF > .env-backend
+            ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
             DB_HOST=${{ secrets.DB_HOST }}
             DB_NAME=${{ secrets.DB_NAME }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             DB_PORT=${{ secrets.DB_PORT }}
             DB_USER=${{ secrets.DB_USER }}
+            DOCKERHUB_REPO=${{ secrets.DOCKERHUB_REPO }}
+            DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }}
+            DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+            EC2_HOST=${{ secrets.EC2_HOST }}
+            EC2_KEY=${{ secrets.EC2_KEY }}
+            EC2_USER=${{ secrets.EC2_USER }}
             GOOGLE_ACCESS_KEY_BASE64=${{ secrets.GOOGLE_ACCESS_KEY_BASE64 }}
             GOOGLE_RECAPTCHA_V3_SECRET_KEY=${{ secrets.GOOGLE_RECAPTCHA_V3_SECRET_KEY }}
+            HUGGINGFACE_ACCESS_TOKEN=${{ secrets.HUGGINGFACE_ACCESS_TOKEN }}
+            NOREPLY_EMAIL=${{ secrets.NOREPLY_EMAIL }}
+            SMTP_HOST=${{ secrets.SMTP_HOST }}
             SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
+            SMTP_PORT=${{ secrets.SMTP_PORT }}
             SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}
             EOF"
             

@@ -15,12 +15,12 @@ spring:
       enabled: true
 
   mail:
-    host: email-smtp.ap-south-1.amazonaws.com
-    port: 587
+    host: ${SMTP_HOST}
+    port: ${SMTP_PORT}
     username: ${SMTP_USERNAME}
     password: ${SMTP_PASSWORD}
-    noreply-email: noreply@adityabijapurkar.in
-    admin-email: adityabijapurkar@gmail.com
+    noreply-email: ${NOREPLY_EMAIL}
+    admin-email: ${ADMIN_EMAIL}
     properties:
       mail:
         smtp:
