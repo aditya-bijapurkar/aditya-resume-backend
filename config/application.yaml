@@ -52,7 +52,7 @@ spring:
         generate_statistics: false
 
 aws:
-  region: ap-south-1
+  region: ${AWS_REGION}
   ec2:
     public_dns: ${EC2_PUBLIC_DNS}
     callback_port: ${EC2_CALLBACK_PORT}

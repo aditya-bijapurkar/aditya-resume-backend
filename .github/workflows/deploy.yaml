@@ -35,6 +35,7 @@ jobs:
             echo "writing secrets to .env-backend file"
             sudo bash -c "cat <<EOF > .env-backend
             ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
+            AWS_REGION=${{ secrets.AWS_REGION }}
             DB_HOST=${{ secrets.DB_HOST }}
             DB_NAME=${{ secrets.DB_NAME }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
