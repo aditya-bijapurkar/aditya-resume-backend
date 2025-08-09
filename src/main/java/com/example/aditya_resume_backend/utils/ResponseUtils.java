@@ -35,7 +35,7 @@ public class ResponseUtils {
 
     public static ResponseEntity createRedirectResponse() {
         return ResponseEntity.status(HttpStatus.SEE_OTHER)
-                .location(URI.create(""))
+                .location(URI.create(DEFAULT_REDIRECTION_LOCATION))
                 .build();
     }
 
