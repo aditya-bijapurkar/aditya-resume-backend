@@ -26,20 +26,20 @@ import java.util.*;
 public class MeetLinkServiceImpl implements IMeetLinkService {
 
     @Value("${google.calendar_event_scope}")
-    private String GOOGLE_CALENDAR_EVENT_SCOPE;
+    private String googleCalendarEventScope;
     @Value("${google.access_key_base64}")
-    private String GOOGLE_ACCESS_KEY_BASE64;
+    private String googleAccessKeyBase64;
     @Value("${google.tokens_dir}")
-    private String TOKENS_DIR;
+    private String tokensDir;
     @Value("${aws.ec2.callback_port}")
-    private Integer EC2_CALLBACK_PORT;
+    private Integer ec2CallbackPort;
     @Value("${aws.ec2.public_dns}")
-    private String EC2_PUBLIC_DNS;
+    private String ec2PublicDns;
 
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
 
     private Calendar getCalendarService() throws Exception {
-        byte[] decoded = Base64.getDecoder().decode(GOOGLE_ACCESS_KEY_BASE64);
+        byte[] decoded = Base64.getDecoder().decode(googleAccessKeyBase64);
         InputStreamReader in = new InputStreamReader(new ByteArrayInputStream(decoded), StandardCharsets.UTF_8);
 
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, in);
@@ -48,8 +48,8 @@ public class MeetLinkServiceImpl implements IMeetLinkService {
                 GoogleNetHttpTransport.newTrustedTransport(),
                 JSON_FACTORY,
                 clientSecrets,
-                List.of(GOOGLE_CALENDAR_EVENT_SCOPE)
-        ).setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIR)))
+                List.of(googleCalendarEventScope)
+        ).setDataStoreFactory(new FileDataStoreFactory(new java.io.File(tokensDir)))
                 .setAccessType(ApplicationConstants.CALENDAR_ACCESS_TYPE)
                 .setApprovalPrompt(ApplicationConstants.CALENDAR_APPROVAL_PROMPT)
                 .build();
@@ -59,8 +59,8 @@ public class MeetLinkServiceImpl implements IMeetLinkService {
                 JSON_FACTORY,
                 new AuthorizationCodeInstalledApp(flow,
                         new LocalServerReceiver.Builder()
-                                .setPort(EC2_CALLBACK_PORT)
-                                .setHost(EC2_PUBLIC_DNS)
+                                .setPort(ec2CallbackPort)
+                                .setHost(ec2PublicDns)
                                 .build())
                         .authorize(ApplicationConstants.USER)
         ).setApplicationName(ApplicationConstants.APPLICATION_NAME).build();

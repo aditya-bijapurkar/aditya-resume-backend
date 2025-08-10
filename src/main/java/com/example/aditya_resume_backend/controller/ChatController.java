@@ -6,6 +6,7 @@ import com.example.aditya_resume_backend.dto.chat.ChatPromptResponse;
 import com.example.aditya_resume_backend.utils.ResponseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,11 @@ import static com.example.aditya_resume_backend.constants.ControllerConstants.SU
 public class ChatController {
 
     private static final Logger logger = LoggerFactory.getLogger(ChatController.class);
+
+    @Autowired
+    public ChatController() {
+
+    }
 
     @PostMapping("${Routes.chat.response}")
     ResponseEntity<ApiResponse<ChatPromptResponse>> getChatbotResponse(

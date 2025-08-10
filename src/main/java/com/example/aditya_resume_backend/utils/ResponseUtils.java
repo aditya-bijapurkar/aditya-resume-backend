@@ -15,11 +15,11 @@ public class ResponseUtils {
     @Value("${web.redirection_location}")
     private String defaultRedirectionLocation;
 
-    private static String DEFAULT_REDIRECTION_LOCATION ;
+    private static String redirectionLocation ;
 
     @PostConstruct
     public void init() {
-        DEFAULT_REDIRECTION_LOCATION = defaultRedirectionLocation;
+        redirectionLocation = defaultRedirectionLocation;
     }
 
     public static <T> ResponseEntity<ApiResponse<T>> createApiResponse(HttpStatus httpStatus, String message, T data) {
@@ -35,7 +35,7 @@ public class ResponseUtils {
 
     public static ResponseEntity createRedirectResponse() {
         return ResponseEntity.status(HttpStatus.SEE_OTHER)
-                .location(URI.create(DEFAULT_REDIRECTION_LOCATION))
+                .location(URI.create(redirectionLocation))
                 .build();
     }
 

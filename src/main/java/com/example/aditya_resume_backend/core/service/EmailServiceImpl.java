@@ -33,10 +33,9 @@ import java.util.stream.Collectors;
 public class EmailServiceImpl implements IEmailService {
 
     @Value("${spring.mail.noreply-email}")
-    private String NO_REPLY_EMAIL;
-
+    private String noreplyEmail;
     @Value("${spring.mail.admin-email}")
-    private String ADMIN_EMAIL;
+    private String adminEmail;
 
     private final JavaMailSender javaMailSender;
     private final Configuration freemarkerConfig;
@@ -82,8 +81,8 @@ public class EmailServiceImpl implements IEmailService {
 
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, EmailConstants.DEFAULT_ENCODING);
-        helper.setFrom(NO_REPLY_EMAIL);
-        helper.setTo(ADMIN_EMAIL);
+        helper.setFrom(noreplyEmail);
+        helper.setTo(adminEmail);
         helper.setSubject(EmailConstants.REQUEST_SUBJECT);
         helper.setText(htmlBody, true);
 
@@ -105,7 +104,7 @@ public class EmailServiceImpl implements IEmailService {
 
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, EmailConstants.DEFAULT_ENCODING);
-        helper.setFrom(NO_REPLY_EMAIL);
+        helper.setFrom(noreplyEmail);
         helper.setTo(recipients.toArray(new String[0]));
         helper.setSubject(EmailConstants.INITIATE_SUBJECT);
         helper.setText(htmlBody, true);
@@ -116,7 +115,7 @@ public class EmailServiceImpl implements IEmailService {
     @Async
     @Override
     public void sendConfirmationEmail(List<NameEmailDTO> recipients, String meetLink, LocalDateTime scheduleTime) throws IOException, TemplateException, MessagingException {
-        recipients.add(NameEmailDTO.builder().emailId(ADMIN_EMAIL).build());
+        recipients.add(NameEmailDTO.builder().emailId(adminEmail).build());
 
         List<String> recipientsEmails = recipients.stream().map(NameEmailDTO::getEmailId).toList();
         List<String> recipientsNames = recipients.stream().map(NameEmailDTO::getFirstName).toList();
@@ -135,7 +134,7 @@ public class EmailServiceImpl implements IEmailService {
 
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, EmailConstants.DEFAULT_ENCODING);
-        helper.setFrom(NO_REPLY_EMAIL);
+        helper.setFrom(noreplyEmail);
         helper.setTo(recipientsEmails.toArray(new String[0]));
         helper.setSubject(EmailConstants.ACCEPT_SUBJECT);
         helper.setText(htmlBody, true);
@@ -158,7 +157,7 @@ public class EmailServiceImpl implements IEmailService {
 
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, EmailConstants.DEFAULT_ENCODING);
-        helper.setFrom(NO_REPLY_EMAIL);
+        helper.setFrom(noreplyEmail);
         helper.setTo(recipients.toArray(new String[0]));
         helper.setSubject(EmailConstants.REJECT_SUBJECT);
         helper.setText(htmlBody, true);
@@ -170,8 +169,8 @@ public class EmailServiceImpl implements IEmailService {
     @Override
     public void sendSimpleMail(String toEmail, String subject, String text) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setFrom(NO_REPLY_EMAIL);
-        mailMessage.setTo(toEmail != null ? toEmail : ADMIN_EMAIL);
+        mailMessage.setFrom(noreplyEmail);
+        mailMessage.setTo(toEmail != null ? toEmail : adminEmail);
         mailMessage.setSubject(subject);
         mailMessage.setText(text);
 
