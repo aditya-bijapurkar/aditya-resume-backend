@@ -67,6 +67,10 @@ google:
   recaptcha_v3:
     secret_key: ${GOOGLE_RECAPTCHA_V3_SECRET_KEY}
 
+perplexity_ai:
+  access_token: ${PERPLEXITY_AI_ACCESS_TOKEN}
+  model_url: ${PERPLEXITY_AI_BASE_URL}
+
 
 ###### API ROUTES ######
 RequestMapping:

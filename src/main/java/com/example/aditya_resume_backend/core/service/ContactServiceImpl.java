@@ -8,12 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ContactService implements IContactService {
+public class ContactServiceImpl implements IContactService {
 
     private final IEmailService emailService;
 
     @Autowired
-    public ContactService(IEmailService emailService) {
+    public ContactServiceImpl(IEmailService emailService) {
         this.emailService = emailService;
     }
 

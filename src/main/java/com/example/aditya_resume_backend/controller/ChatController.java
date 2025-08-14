@@ -1,5 +1,6 @@
 package com.example.aditya_resume_backend.controller;
 
+import com.example.aditya_resume_backend.core.port.service.IChatApiService;
 import com.example.aditya_resume_backend.dto.ApiResponse;
 import com.example.aditya_resume_backend.dto.chat.ChatPromptRequest;
 import com.example.aditya_resume_backend.dto.chat.ChatPromptResponse;
@@ -21,9 +22,11 @@ public class ChatController {
 
     private static final Logger logger = LoggerFactory.getLogger(ChatController.class);
 
-    @Autowired
-    public ChatController() {
+    private final IChatApiService huggingFaceService;
 
+    @Autowired
+    public ChatController(IChatApiService huggingFaceService) {
+        this.huggingFaceService = huggingFaceService;
     }
 
     @PostMapping("${Routes.chat.response}")
@@ -31,9 +34,7 @@ public class ChatController {
             @RequestBody ChatPromptRequest chatPromptRequest
     ) {
         try {
-            ChatPromptResponse chatPromptResponse = ChatPromptResponse.builder()
-                    .response("This feature is under construction, thanks for your patience!")
-                    .build();
+            ChatPromptResponse chatPromptResponse = huggingFaceService.generateModelResponse(chatPromptRequest);
             return ResponseUtils.createApiResponse(HttpStatus.OK, SUCCESS, chatPromptResponse);
         }
         catch (Exception e) {
@@ -41,6 +42,5 @@ public class ChatController {
             return ResponseUtils.createApiResponse(HttpStatus.INTERNAL_SERVER_ERROR, FAILED, null);
         }
     }
-
 
 }
