@@ -21,14 +21,4 @@ public class ApplicationConstants {
     public static final String APPLICATION_NAME = "Aditya Meeting Schedule";
     public static final String DEFAULT_MEET_SUMMARY = "Scheduled meet with Aditya Bijapurkar";
 
-
-    public static final String MESSAGES = "messages";
-
-    public static final Map<String, Object> DEFAULT_PERPLEXITY_REQUEST_BODY = Map.of(
-        "model", "sonar",
-        "max_tokens", 100,
-        "temperature", 0.7,
-        "stream", false
-    );
-
 }

@@ -56,6 +56,9 @@ aws:
   ec2:
     public_dns: ${EC2_PUBLIC_DNS}
     callback_port: ${EC2_CALLBACK_PORT}
+  s3:
+    bucket: ${S3_BUCKET_NAME}
+    vector_embeddings_key: ${S3_BUCKET_VECTOR_EMBEDDINGS_KEY}
 
 web:
   redirection_location: ${DEFAULT_REDIRECTION_LOCATION}
@@ -67,9 +70,14 @@ google:
   recaptcha_v3:
     secret_key: ${GOOGLE_RECAPTCHA_V3_SECRET_KEY}
 
-perplexity_ai:
-  access_token: ${PERPLEXITY_AI_ACCESS_TOKEN}
-  model_url: ${PERPLEXITY_AI_BASE_URL}
+openai:
+  api:
+    access_token: ${OPENAI_ACCESS_TOKEN}
+    base_url: ${OPENAI_BASE_URL}
+    chat_model: ${OPENAI_CHAT_MODEL}
+    embedding_model: ${OPENAI_EMBEDDING_MODEL}
+  retrieval:
+    topK: 3
 
 
 ###### API ROUTES ######

@@ -52,8 +52,10 @@ jobs:
             EC2_USER=${{ secrets.EC2_USER }}
             GOOGLE_ACCESS_KEY_BASE64=${{ secrets.GOOGLE_ACCESS_KEY_BASE64 }}
             GOOGLE_RECAPTCHA_V3_SECRET_KEY=${{ secrets.GOOGLE_RECAPTCHA_V3_SECRET_KEY }}
-            PERPLEXITY_AI_ACCESS_TOKEN=${{ secrets.PERPLEXITY_AI_ACCESS_TOKEN }}
-            PERPLEXITY_AI_BASE_URL=${{ secrets.PERPLEXITY_AI_BASE_URL }}
+            OPENAI_ACCESS_TOKEN=${{ secrets.OPENAI_ACCESS_TOKEN }}
+            OPENAI_BASE_URL=${{ secrets.OPENAI_BASE_URL }}
+            OPENAI_CHAT_MODEL=${{ secrets.OPENAI_CHAT_MODEL }}
+            OPENAI_EMBEDDING_MODEL=${{ secrets.OPENAI_EMBEDDING_MODEL }}
             NOREPLY_EMAIL=${{ secrets.NOREPLY_EMAIL }}
             SMTP_HOST=${{ secrets.SMTP_HOST }}
             SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
