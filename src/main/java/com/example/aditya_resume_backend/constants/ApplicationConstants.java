@@ -1,7 +1,5 @@
 package com.example.aditya_resume_backend.constants;
 
-import java.util.Map;
-
 public class ApplicationConstants {
 
     private ApplicationConstants() {

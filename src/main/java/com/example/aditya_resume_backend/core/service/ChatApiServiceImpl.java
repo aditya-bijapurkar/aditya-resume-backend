@@ -1,8 +1,11 @@
 package com.example.aditya_resume_backend.core.service;
 
 import com.example.aditya_resume_backend.core.port.service.IChatApiService;
+import com.example.aditya_resume_backend.core.port.service.IRagRetrievalService;
 import com.example.aditya_resume_backend.dto.chat.ChatPromptRequest;
 import com.example.aditya_resume_backend.dto.chat.ChatPromptResponse;
+import com.example.aditya_resume_backend.dto.chat.embeddings.DocumentEmbeddings;
+import com.example.aditya_resume_backend.dto.chat.embeddings.VectorEmbeddingResponse;
 import com.example.aditya_resume_backend.dto.chat.openapi.OpenApiResponseDTO;
 import com.example.aditya_resume_backend.exceptions.AiModelException;
 import org.slf4j.Logger;
@@ -17,6 +20,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.example.aditya_resume_backend.constants.ChatConstants.*;
 
@@ -25,44 +29,93 @@ public class ChatApiServiceImpl implements IChatApiService {
 
     private static final Logger logger = LoggerFactory.getLogger(ChatApiServiceImpl.class);
 
-    private final WebClient webClient;
-
-    @Value("${openai.retrieval.topK}")
-    private Integer topK;
     @Value("${openai.api.chat_model}")
     private String openaiChatModel;
+    @Value("${openai.api.embedding_model}")
+    private String openaiEmbeddingModel;
+
+    private final WebClient webClient;
+    private final IRagRetrievalService ragRetrievalService;
 
     @Autowired
     public ChatApiServiceImpl(
             @Value("${openai.api.access_token}") String openaiAccessToken,
-            @Value("${openai.api.base_url}") String openaiBaseUrl
+            @Value("${openai.api.base_url}") String openaiBaseUrl,
+            IRagRetrievalService ragRetrievalService
     ) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setBearerAuth(openaiAccessToken);
-
         this.webClient = WebClient.builder()
                 .baseUrl(openaiBaseUrl)
                 .defaultHeaders(headers -> headers.addAll(httpHeaders))
                 .build();
+
+        this.ragRetrievalService = ragRetrievalService;
     }
 
-    private List<Map<String, String>> setModelRequestContext(String userPrompt) {
+    private List<Map<String, String>> setModelRequestContext(String prompt) {
         return List.of(
             Map.of(
                 ROLE, USER,
-                CONTENT, userPrompt
+                CONTENT, prompt
             )
         );
     }
 
-    @Override
-    public ChatPromptResponse generateModelResponse(ChatPromptRequest chatPromptRequest) throws AiModelException {
+    private List<Double> getVectorEmbeddingForPrompt(String userPrompt) throws AiModelException {
+        try {
+            Map<String, Object> requestBody = new java.util.HashMap<>(OPENAPI_REQUEST_BODY);
+            requestBody.put(MODEL, openaiEmbeddingModel);
+            requestBody.put(INPUT, userPrompt);
+
+            logger.info("Sending user prompt to OpenAi for embedding: {}...", userPrompt);
+
+            VectorEmbeddingResponse vectorEmbedding = webClient.post()
+                    .uri(EMBEDDING_MODEL_ENDPOINT)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(requestBody)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, response ->
+                            response.bodyToMono(String.class).map(body -> new RuntimeException("OpenAI embeddings API error: " + body))
+                    )
+                    .bodyToMono(VectorEmbeddingResponse.class)
+                    .block();
+
+            logger.info("Successfully fetched OpenAi embeddings from API response!");
+
+            assert vectorEmbedding != null;
+            return vectorEmbedding.getData().stream()
+                    .findFirst().orElseThrow()
+                    .getEmbedding();
+        }
+        catch (Exception e) {
+            logger.error("Error in getting vector embeddings from OpenAi bot...");
+            throw new AiModelException(e.getMessage());
+        }
+    }
+
+    private String getFinalPrompt(String userPrompt, List<DocumentEmbeddings> topKDocuments) {
+        if(topKDocuments == null || topKDocuments.isEmpty()) {
+            return userPrompt;
+        }
+
+        String contextString = topKDocuments.stream()
+                .map(DocumentEmbeddings::getText)
+                .collect(Collectors.joining("\n\n"));
+
+        return String.format(USER_PROMPT_WITH_CONTEXT, contextString, userPrompt);
+    }
+
+    private ChatPromptResponse generateChatModelResponse(String userPrompt, List<DocumentEmbeddings> topKDocuments) throws AiModelException {
         try {
             Map<String, Object> requestBody = new java.util.HashMap<>(OPENAPI_REQUEST_BODY);
             requestBody.put(MODEL, openaiChatModel);
-            requestBody.put(MESSAGES, setModelRequestContext(chatPromptRequest.getPrompt()));
+            requestBody.put(MESSAGES, setModelRequestContext(getFinalPrompt(userPrompt, topKDocuments)));
 
-            logger.info("Sending new prompt to OpenAi chat bot: {}", chatPromptRequest.getPrompt());
+            logger.info("Sending user prompt to OpenAi chat bot with {} supporting documents: {}...",
+                    topKDocuments.size(),
+                    userPrompt
+            );
 
             OpenApiResponseDTO modelResponse = webClient.post()
                     .uri(CHAT_MODEL_ENDPOINT)
@@ -70,10 +123,12 @@ public class ChatApiServiceImpl implements IChatApiService {
                     .bodyValue(requestBody)
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, response ->
-                            response.bodyToMono(String.class).map(body -> new RuntimeException("OpenAI API error: " + body))
+                            response.bodyToMono(String.class).map(body -> new RuntimeException("OpenAI chat API error: " + body))
                     )
                     .bodyToMono(OpenApiResponseDTO.class)
                     .block();
+
+            logger.info("Successfully fetched OpenAi chat bot's response!");
 
             assert modelResponse != null;
             return ChatPromptResponse.builder()
@@ -84,6 +139,15 @@ public class ChatApiServiceImpl implements IChatApiService {
             logger.error("Error in getting response from OpenAi chat bot...");
             throw new AiModelException(e.getMessage());
         }
+    }
+
+    @Override
+    public ChatPromptResponse generateModelResponse(ChatPromptRequest chatPromptRequest) throws AiModelException {
+        List<Double> userPromptEmbedding = getVectorEmbeddingForPrompt(chatPromptRequest.getPrompt());
+
+        List<DocumentEmbeddings> topKDocuments = ragRetrievalService.getRelevantDocuments(userPromptEmbedding);
+
+        return generateChatModelResponse(chatPromptRequest.getPrompt(), topKDocuments);
     }
 
 }

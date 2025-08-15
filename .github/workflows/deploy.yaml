@@ -57,6 +57,8 @@ jobs:
             OPENAI_CHAT_MODEL=${{ secrets.OPENAI_CHAT_MODEL }}
             OPENAI_EMBEDDING_MODEL=${{ secrets.OPENAI_EMBEDDING_MODEL }}
             NOREPLY_EMAIL=${{ secrets.NOREPLY_EMAIL }}
+            S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}
+            S3_BUCKET_VECTOR_EMBEDDINGS_KEY=${{ secrets.S3_BUCKET_VECTOR_EMBEDDINGS_KEY }}
             SMTP_HOST=${{ secrets.SMTP_HOST }}
             SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
             SMTP_PORT=${{ secrets.SMTP_PORT }}

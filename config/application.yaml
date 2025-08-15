@@ -57,7 +57,7 @@ aws:
     public_dns: ${EC2_PUBLIC_DNS}
     callback_port: ${EC2_CALLBACK_PORT}
   s3:
-    bucket: ${S3_BUCKET_NAME}
+    bucket_name: ${S3_BUCKET_NAME}
     vector_embeddings_key: ${S3_BUCKET_VECTOR_EMBEDDINGS_KEY}
 
 web:
@@ -78,7 +78,7 @@ openai:
     embedding_model: ${OPENAI_EMBEDDING_MODEL}
   retrieval:
     topK: 3
-
+    threshold: 0.5
 
 ###### API ROUTES ######
 RequestMapping:
