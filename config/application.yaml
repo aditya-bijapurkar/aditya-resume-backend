@@ -78,7 +78,7 @@ openai:
     embedding_model: ${OPENAI_EMBEDDING_MODEL}
   retrieval:
     topK: 3
-    threshold: 0.5
+    threshold: 0.4
 
 ###### API ROUTES ######
 RequestMapping:

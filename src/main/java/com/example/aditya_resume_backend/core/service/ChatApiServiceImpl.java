@@ -56,6 +56,10 @@ public class ChatApiServiceImpl implements IChatApiService {
     private List<Map<String, String>> setModelRequestContext(String prompt) {
         return List.of(
             Map.of(
+                ROLE, SYSTEM,
+                CONTENT, SYSTEM_CONTEXT
+            ),
+            Map.of(
                 ROLE, USER,
                 CONTENT, prompt
             )

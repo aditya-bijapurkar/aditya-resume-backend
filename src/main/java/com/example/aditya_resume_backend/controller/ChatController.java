@@ -22,11 +22,11 @@ public class ChatController {
 
     private static final Logger logger = LoggerFactory.getLogger(ChatController.class);
 
-    private final IChatApiService huggingFaceService;
+    private final IChatApiService chatApiService;
 
     @Autowired
     public ChatController(IChatApiService huggingFaceService) {
-        this.huggingFaceService = huggingFaceService;
+        this.chatApiService = huggingFaceService;
     }
 
     @PostMapping("${Routes.chat.response}")
@@ -34,7 +34,7 @@ public class ChatController {
             @RequestBody ChatPromptRequest chatPromptRequest
     ) {
         try {
-            ChatPromptResponse chatPromptResponse = huggingFaceService.generateModelResponse(chatPromptRequest);
+            ChatPromptResponse chatPromptResponse = chatApiService.generateModelResponse(chatPromptRequest);
             return ResponseUtils.createApiResponse(HttpStatus.OK, SUCCESS, chatPromptResponse);
         }
         catch (Exception e) {
