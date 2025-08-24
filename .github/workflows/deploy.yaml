@@ -34,35 +34,35 @@ jobs:
             
             echo "writing secrets to .env-backend file"
             sudo tee /home/ec2-user/.env-backend > /dev/null <<'EOF'
-            ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
-            AWS_REGION=${{ secrets.AWS_REGION }}
-            DB_HOST=${{ secrets.DB_HOST }}
-            DB_NAME=${{ secrets.DB_NAME }}
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            DB_PORT=${{ secrets.DB_PORT }}
-            DB_USER=${{ secrets.DB_USER }}
-            DEFAULT_REDIRECTION_LOCATION=${{ secrets.DEFAULT_REDIRECTION_LOCATION }}
-            DOCKERHUB_REPO=${{ secrets.DOCKERHUB_REPO }}
-            DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }}
-            DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
-            EC2_CALLBACK_PORT=${{ secrets.EC2_CALLBACK_PORT }}
-            EC2_HOST=${{ secrets.EC2_HOST }}
-            EC2_KEY=${{ secrets.EC2_KEY }}
-            EC2_PUBLIC_DNS=${{ secrets.EC2_PUBLIC_DNS }}
-            EC2_USER=${{ secrets.EC2_USER }}
-            GOOGLE_ACCESS_KEY_BASE64=${{ secrets.GOOGLE_ACCESS_KEY_BASE64 }}
-            GOOGLE_RECAPTCHA_V3_SECRET_KEY=${{ secrets.GOOGLE_RECAPTCHA_V3_SECRET_KEY }}
-            OPENAI_ACCESS_TOKEN=${{ secrets.OPENAI_ACCESS_TOKEN }}
-            OPENAI_BASE_URL=${{ secrets.OPENAI_BASE_URL }}
-            OPENAI_CHAT_MODEL=${{ secrets.OPENAI_CHAT_MODEL }}
-            OPENAI_EMBEDDING_MODEL=${{ secrets.OPENAI_EMBEDDING_MODEL }}
-            NOREPLY_EMAIL=${{ secrets.NOREPLY_EMAIL }}
-            S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}
-            S3_BUCKET_VECTOR_EMBEDDINGS_KEY=${{ secrets.S3_BUCKET_VECTOR_EMBEDDINGS_KEY }}
-            SMTP_HOST=${{ secrets.SMTP_HOST }}
-            SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
-            SMTP_PORT=${{ secrets.SMTP_PORT }}
-            SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}
+            ADMIN_EMAIL="${{ secrets.ADMIN_EMAIL }}"
+            AWS_REGION="${{ secrets.AWS_REGION }}"
+            DB_HOST="${{ secrets.DB_HOST }}"
+            DB_NAME="${{ secrets.DB_NAME }}"
+            DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
+            DB_PORT="${{ secrets.DB_PORT }}"
+            DB_USER="${{ secrets.DB_USER }}"
+            DEFAULT_REDIRECTION_LOCATION="${{ secrets.DEFAULT_REDIRECTION_LOCATION }}"
+            DOCKERHUB_REPO="${{ secrets.DOCKERHUB_REPO }}"
+            DOCKERHUB_TOKEN="${{ secrets.DOCKERHUB_TOKEN }}"
+            DOCKERHUB_USERNAME="${{ secrets.DOCKERHUB_USERNAME }}"
+            EC2_CALLBACK_PORT="${{ secrets.EC2_CALLBACK_PORT }}"
+            EC2_HOST="${{ secrets.EC2_HOST }}"
+            EC2_KEY="${{ secrets.EC2_KEY }}"
+            EC2_PUBLIC_DNS="${{ secrets.EC2_PUBLIC_DNS }}"
+            EC2_USER="${{ secrets.EC2_USER }}"
+            GOOGLE_ACCESS_KEY_BASE64="${{ secrets.GOOGLE_ACCESS_KEY_BASE64 }}"
+            GOOGLE_RECAPTCHA_V3_SECRET_KEY="${{ secrets.GOOGLE_RECAPTCHA_V3_SECRET_KEY }}"
+            OPENAI_ACCESS_TOKEN="${{ secrets.OPENAI_ACCESS_TOKEN }}"
+            OPENAI_BASE_URL="${{ secrets.OPENAI_BASE_URL }}"
+            OPENAI_CHAT_MODEL="${{ secrets.OPENAI_CHAT_MODEL }}"
+            OPENAI_EMBEDDING_MODEL="${{ secrets.OPENAI_EMBEDDING_MODEL }}"
+            NOREPLY_EMAIL="${{ secrets.NOREPLY_EMAIL }}"
+            S3_BUCKET_NAME="${{ secrets.S3_BUCKET_NAME }}"
+            S3_BUCKET_VECTOR_EMBEDDINGS_KEY="${{ secrets.S3_BUCKET_VECTOR_EMBEDDINGS_KEY }}"
+            SMTP_HOST="${{ secrets.SMTP_HOST }}"
+            SMTP_PASSWORD="${{ secrets.SMTP_PASSWORD }}"
+            SMTP_PORT="${{ secrets.SMTP_PORT }}"
+            SMTP_USERNAME="${{ secrets.SMTP_USERNAME }}"
             EOF
             
             echo "restarting the application..."
