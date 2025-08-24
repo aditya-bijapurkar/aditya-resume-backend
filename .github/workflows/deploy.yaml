@@ -33,7 +33,7 @@ jobs:
             sudo rm -f .env-backend
             
             echo "writing secrets to .env-backend file"
-            sudo bash -c "cat <<EOF > .env-backend
+            sudo tee /home/ec2-user/.env-backend > /dev/null <<'EOF'
             ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
             AWS_REGION=${{ secrets.AWS_REGION }}
             DB_HOST=${{ secrets.DB_HOST }}
@@ -63,7 +63,7 @@ jobs:
             SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
             SMTP_PORT=${{ secrets.SMTP_PORT }}
             SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}
-            EOF"
+            EOF
             
             echo "restarting the application..."
             sudo docker-compose down || true
