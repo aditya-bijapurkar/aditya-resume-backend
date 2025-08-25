@@ -1,4 +1,4 @@
-FROM maven:3.9.6-eclipse-temurin-17-alpine AS build
+FROM --platform=linux/arm64 maven:3.9.6-eclipse-temurin-17-alpine AS build
 
 WORKDIR /app
 
@@ -8,10 +8,12 @@ RUN mvn dependency:go-offline -B
 COPY src ./src
 COPY config ./config
 
-RUN mvn clean package -DskipTests && \
-    rm -rf ~/.m2
+RUN mvn clean package -DskipTests \
+    -Dmaven.compiler.source=17 \
+    -Dmaven.compiler.target=17 \
+    && rm -rf ~/.m2
 
-FROM --platform=linux/amd64 gcr.io/distroless/java17-debian11:nonroot
+FROM --platform=linux/arm64 gcr.io/distroless/java17-debian11:nonroot
 
 WORKDIR /app
 
@@ -23,4 +25,14 @@ USER 1001:1001
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", \
+    "-XX:+UseG1GC", \
+    "-XX:MaxGCPauseMillis=200", \
+    "-XX:+UseStringDeduplication", \
+    "-XX:+OptimizeStringConcat", \
+    "-XX:+UseCompressedOops", \
+    "-XX:+UseCompressedClassPointers", \
+    "-Xms512m", \
+    "-Xmx1024m", \
+    "-Djava.security.egd=file:/dev/./urandom", \
+    "-jar", "app.jar"]
