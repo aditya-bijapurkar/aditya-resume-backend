@@ -1,4 +1,4 @@
-FROM --platform=linux/arm64 maven:3.9.6-eclipse-temurin-17-alpine AS build
+FROM --platform=$BUILDPLATFORM maven:3.9.6-eclipse-temurin-17-alpine AS build
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ RUN mvn clean package -DskipTests \
     -Dmaven.compiler.target=17 \
     && rm -rf ~/.m2
 
-FROM --platform=linux/arm64 gcr.io/distroless/java17-debian11:nonroot
+FROM --platform=$TARGETPLATFORM gcr.io/distroless/java17-debian11:nonroot
 
 WORKDIR /app
 
