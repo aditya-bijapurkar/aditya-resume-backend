@@ -25,13 +25,10 @@ USER 1001:1001
 EXPOSE 8080
 
 ENTRYPOINT ["java", \
-    "-XX:+UseG1GC", \
-    "-XX:MaxGCPauseMillis=200", \
-    "-XX:+UseStringDeduplication", \
-    "-XX:+OptimizeStringConcat", \
-    "-XX:+UseCompressedOops", \
-    "-XX:+UseCompressedClassPointers", \
-    "-Xms512m", \
-    "-Xmx1024m", \
+    "-XX:+UseSerialGC", \
+    "-Xms128m", \
+    "-Xmx512m", \
+    "-XX:MaxMetaspaceSize=128m", \
+    "-Dserver.tomcat.max-threads=20", \
     "-Djava.security.egd=file:/dev/./urandom", \
     "-jar", "app.jar"]
