@@ -31,4 +31,5 @@ ENTRYPOINT ["java", \
     "-XX:MaxMetaspaceSize=128m", \
     "-Dserver.tomcat.max-threads=20", \
     "-Djava.security.egd=file:/dev/./urandom", \
+    "-Djava.net.preferIPv4Stack=true", \
     "-jar", "app.jar"]
