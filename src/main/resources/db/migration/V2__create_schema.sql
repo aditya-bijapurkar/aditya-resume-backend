@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TABLE status (
 	id UUID PRIMARY KEY,
 	title TEXT
