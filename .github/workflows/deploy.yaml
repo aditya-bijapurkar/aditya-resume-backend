@@ -1,4 +1,4 @@
-name: Deploy to EC2 from BE
+name: Deploy to remote instance from BE
 
 on:
   push:
@@ -24,12 +24,12 @@ jobs:
           IMAGE_NAME=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPO }}:latest
           docker buildx build --platform linux/amd64,linux/arm64 -t $IMAGE_NAME --push .
 
-      - name: Deploy to EC2
+      - name: Deploy to remote instance
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_KEY }}
+          host: ${{ secrets.INSTANCE_IPV4 }}
+          username: ${{ secrets.INSTANCE_USER }}
+          key: ${{ secrets.INSTANCE_KEY }}
           script: |
             cd /home/ubuntu
             sudo rm -f .env-backend
@@ -44,8 +44,8 @@ jobs:
             DB_PORT=${{ secrets.DB_PORT }}
             DB_USER=${{ secrets.DB_USER }}
             DEFAULT_REDIRECTION_LOCATION=${{ secrets.DEFAULT_REDIRECTION_LOCATION }}
-            EC2_CALLBACK_PORT=${{ secrets.EC2_CALLBACK_PORT }}
-            EC2_PUBLIC_DNS=${{ secrets.EC2_PUBLIC_DNS }}
+            INSTANCE_CALLBACK_PORT=${{ secrets.INSTANCE_CALLBACK_PORT }}
+            INSTANCE_PUBLIC_DNS=${{ secrets.INSTANCE_PUBLIC_DNS }}
             GOOGLE_ACCESS_KEY_BASE64=${{ secrets.GOOGLE_ACCESS_KEY_BASE64 }}
             GOOGLE_RECAPTCHA_V3_SECRET_KEY=${{ secrets.GOOGLE_RECAPTCHA_V3_SECRET_KEY }}
             OPENAI_ACCESS_TOKEN=${{ secrets.OPENAI_ACCESS_TOKEN }}

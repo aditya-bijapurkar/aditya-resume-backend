@@ -31,10 +31,10 @@ public class MeetLinkServiceImpl implements IMeetLinkService {
     private String googleAccessKeyBase64;
     @Value("${google.tokens_dir}")
     private String tokensDir;
-    @Value("${aws.ec2.callback_port}")
-    private Integer ec2CallbackPort;
-    @Value("${aws.ec2.public_dns}")
-    private String ec2PublicDns;
+    @Value("${remote.instance.callback_port}")
+    private Integer instanceCallbackPort;
+    @Value("${remote.instance.public_dns}")
+    private String instancePublicDns;
 
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
 
@@ -59,8 +59,8 @@ public class MeetLinkServiceImpl implements IMeetLinkService {
                 JSON_FACTORY,
                 new AuthorizationCodeInstalledApp(flow,
                         new LocalServerReceiver.Builder()
-                                .setPort(ec2CallbackPort)
-                                .setHost(ec2PublicDns)
+                                .setPort(instanceCallbackPort)
+                                .setHost(instancePublicDns)
                                 .build())
                         .authorize(ApplicationConstants.USER)
         ).setApplicationName(ApplicationConstants.APPLICATION_NAME).build();

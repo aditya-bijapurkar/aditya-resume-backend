@@ -61,12 +61,14 @@ spring:
 
 aws:
   region: ${AWS_REGION}
-  ec2:
-    public_dns: ${EC2_PUBLIC_DNS}
-    callback_port: ${EC2_CALLBACK_PORT}
   s3:
     bucket_name: ${S3_BUCKET_NAME}
     vector_embeddings_key: ${S3_BUCKET_VECTOR_EMBEDDINGS_KEY}
+
+remote:
+  instance:
+    public_dns: ${INSTANCE_PUBLIC_DNS}
+    callback_port: ${INSTANCE_CALLBACK_PORT}
 
 web:
   redirection_location: ${DEFAULT_REDIRECTION_LOCATION}
