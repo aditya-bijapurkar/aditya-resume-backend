@@ -3,6 +3,7 @@ package com.example.aditya_resume_backend.core.service;
 import com.example.aditya_resume_backend.constants.ApplicationConstants;
 import com.example.aditya_resume_backend.constants.EmailConstants;
 import com.example.aditya_resume_backend.core.port.dto.NameEmailDTO;
+import com.example.aditya_resume_backend.core.port.dto.UserDTO;
 import com.example.aditya_resume_backend.core.port.service.IEmailService;
 import com.example.aditya_resume_backend.dto.initiate_meet.ScheduleMeetRequest;
 import freemarker.template.Configuration;
@@ -71,6 +72,9 @@ public class EmailServiceImpl implements IEmailService {
                 "meeting_id", meetingId,
                 "required_users", scheduleMeetRequest.getRequiredUsers().stream()
                         .map(user -> user.getFirstName() + " " + user.getLastName())
+                        .collect(Collectors.joining(", ")),
+                "email_ids", scheduleMeetRequest.getRequiredUsers().stream()
+                        .map(UserDTO::getEmailId)
                         .collect(Collectors.joining(", ")),
                 "description", scheduleMeetRequest.getDescription(),
                 EmailConstants.SCHEDULE_DATE, getDateString(scheduleMeetRequest.getScheduleTime()),

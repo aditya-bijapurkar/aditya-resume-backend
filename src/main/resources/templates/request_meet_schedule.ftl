@@ -2,6 +2,7 @@
   <body>
     <h3>Hello, A new meeting request has been initiated</h3>
     <p>The following people would join the meet: ${required_users}</p>
+    <p>Email ids to connect with: ${email_ids}</p>
     <p>Agenda of the meeting: ${description}</p>
     <p>Schedule requested on ${schedule_date}, ${schedule_time} IST</p>
     <p>
