@@ -22,7 +22,7 @@ jobs:
       - name: Build and push to Docker image to aditya-resume-backend
         run: |
           IMAGE_NAME=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPO }}:latest
-          docker buildx build --platform linux/amd64,linux/arm64 -t $IMAGE_NAME --push .
+          docker buildx build --platform linux/amd64 -t $IMAGE_NAME --push .
 
       - name: Deploy to remote instance
         uses: appleboy/ssh-action@master
@@ -37,6 +37,8 @@ jobs:
             echo "writing secrets to .env-backend file"
             sudo bash -c 'cat <<EOF > .env-backend
             ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
             AWS_REGION=${{ secrets.AWS_REGION }}
             DB_HOST=${{ secrets.DB_HOST }}
             DB_NAME=${{ secrets.DB_NAME }}
