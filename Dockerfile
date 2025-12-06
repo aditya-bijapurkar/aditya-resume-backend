@@ -23,13 +23,3 @@ COPY --from=build /app/config ./config
 USER 1001:1001
 
 EXPOSE 8080
-
-ENTRYPOINT ["java", \
-    "-XX:+UseSerialGC", \
-    "-Xms128m", \
-    "-Xmx512m", \
-    "-XX:MaxMetaspaceSize=128m", \
-    "-Dserver.tomcat.max-threads=20", \
-    "-Djava.security.egd=file:/dev/./urandom", \
-    "-Djava.net.preferIPv4Stack=true", \
-    "-jar", "app.jar"]
