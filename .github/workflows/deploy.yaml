@@ -46,8 +46,6 @@ jobs:
             DB_PORT=${{ secrets.DB_PORT }}
             DB_USER=${{ secrets.DB_USER }}
             DEFAULT_REDIRECTION_LOCATION=${{ secrets.DEFAULT_REDIRECTION_LOCATION }}
-            INSTANCE_CALLBACK_PORT=${{ secrets.INSTANCE_CALLBACK_PORT }}
-            INSTANCE_PUBLIC_DNS=${{ secrets.INSTANCE_PUBLIC_DNS }}
             GOOGLE_ACCESS_KEY_BASE64=${{ secrets.GOOGLE_ACCESS_KEY_BASE64 }}
             GOOGLE_RECAPTCHA_V3_SECRET_KEY=${{ secrets.GOOGLE_RECAPTCHA_V3_SECRET_KEY }}
             OPENAI_ACCESS_TOKEN=${{ secrets.OPENAI_ACCESS_TOKEN }}

@@ -2,22 +2,19 @@ package com.example.aditya_resume_backend.core.service;
 
 import com.example.aditya_resume_backend.constants.ApplicationConstants;
 import com.example.aditya_resume_backend.core.port.service.IMeetLinkService;
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.*;
+import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -29,41 +26,25 @@ public class MeetLinkServiceImpl implements IMeetLinkService {
     private String googleCalendarEventScope;
     @Value("${google.access_key_base64}")
     private String googleAccessKeyBase64;
-    @Value("${google.tokens_dir}")
-    private String tokensDir;
-    @Value("${remote.instance.callback_port}")
-    private Integer instanceCallbackPort;
-    @Value("${remote.instance.public_dns}")
-    private String instancePublicDns;
 
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
 
     private Calendar getCalendarService() throws Exception {
         byte[] decoded = Base64.getDecoder().decode(googleAccessKeyBase64);
-        InputStreamReader in = new InputStreamReader(new ByteArrayInputStream(decoded), StandardCharsets.UTF_8);
 
-        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, in);
+        ServiceAccountCredentials serviceAccount = ServiceAccountCredentials.fromStream(new ByteArrayInputStream(decoded));
 
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                GoogleNetHttpTransport.newTrustedTransport(),
-                JSON_FACTORY,
-                clientSecrets,
-                List.of(googleCalendarEventScope)
-        ).setDataStoreFactory(new FileDataStoreFactory(new java.io.File(tokensDir)))
-                .setAccessType(ApplicationConstants.CALENDAR_ACCESS_TYPE)
-                .setApprovalPrompt(ApplicationConstants.CALENDAR_APPROVAL_PROMPT)
-                .build();
+        GoogleCredentials scopedCredentials = serviceAccount.createScoped(Collections.singleton(CalendarScopes.CALENDAR));
+
+        HttpCredentialsAdapter requestInitializer = new HttpCredentialsAdapter(scopedCredentials);
 
         return new Calendar.Builder(
                 GoogleNetHttpTransport.newTrustedTransport(),
                 JSON_FACTORY,
-                new AuthorizationCodeInstalledApp(flow,
-                        new LocalServerReceiver.Builder()
-                                .setPort(instanceCallbackPort)
-                                .setHost(instancePublicDns)
-                                .build())
-                        .authorize(ApplicationConstants.USER)
-        ).setApplicationName(ApplicationConstants.APPLICATION_NAME).build();
+                requestInitializer
+            )
+            .setApplicationName(ApplicationConstants.APPLICATION_NAME)
+            .build();
     }
 
     @Override
