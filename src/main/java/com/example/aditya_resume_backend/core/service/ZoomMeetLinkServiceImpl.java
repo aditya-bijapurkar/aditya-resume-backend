@@ -7,6 +7,8 @@ import com.example.aditya_resume_backend.core.port.dto.ZoomMeetingRequestBodyDTO
 import com.example.aditya_resume_backend.core.port.service.IMeetLinkService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -37,8 +39,10 @@ public class ZoomMeetLinkServiceImpl implements IMeetLinkService {
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public ZoomMeetLinkServiceImpl(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+    public ZoomMeetLinkServiceImpl() {
+        this.objectMapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     private String getZoomAccessToken() throws IOException, InterruptedException {
