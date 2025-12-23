@@ -49,6 +49,12 @@ public class MeetLinkServiceImpl implements IMeetLinkService {
 
     @Override
     public String generateGoogleMeetingLink(LocalDateTime dateTime) throws Exception {
+        // hack: hardcoding a static meet link for now, TO BE REMOVED!!
+        // to google meeting links via calendar events we have 2 options
+        //     1. refresh token which has to be manually refreshed
+        //     2. service account which has cost to generate events
+
+        /* TODO fix this to generate new meeting links via calendar schedule on runtime
         Calendar service = getCalendarService();
         ZoneId ist = ZoneId.of(ApplicationConstants.IST);
 
@@ -88,5 +94,8 @@ public class MeetLinkServiceImpl implements IMeetLinkService {
         }
 
         return meetLink;
+        */
+
+        return "https://meet.google.com/sib-obac-xji";
     }
 }
