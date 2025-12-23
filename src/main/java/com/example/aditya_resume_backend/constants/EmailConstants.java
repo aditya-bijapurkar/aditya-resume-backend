@@ -8,6 +8,10 @@ public class EmailConstants {
 
     public static final String DEFAULT_ENCODING = "UTF-8";
 
+    public static final String MEETING_LINK = "meeting_link";
+    public static final String PASSWORD = "password";
+    public static final String PARTICIPANTS = "participants";
+    public static final String PARTICIPANTS_EMAILS = "participants_emails";
     public static final String SCHEDULE_TIME = "schedule_time";
     public static final String SCHEDULE_DATE = "schedule_date";
 
@@ -19,6 +23,8 @@ public class EmailConstants {
 
     public static final String ACCEPT_TEMPLATE_FILE = "accept_meet_schedule.ftl";
     public static final String ACCEPT_SUBJECT = "Meeting schedule has been accepted!";
+    public static final String ACCEPT_TEMPLATE_FILE_ADMIN = "accept_meet_schedule_admin.ftl";
+    public static final String ACCEPT_SUBJECT_ADMIN = "Meeting schedule has been sent!";
 
     public static final String REJECT_TEMPLATE_FILE = "reject_meet_schedule.ftl";
     public static final String REJECT_SUBJECT = "Meeting schedule is rejected :(";

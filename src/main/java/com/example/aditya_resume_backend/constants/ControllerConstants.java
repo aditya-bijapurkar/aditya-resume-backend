@@ -13,6 +13,4 @@ public class ControllerConstants {
     public static final String RECAPTCHA_VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
     public static final Double RECAPTCHA_VERIFY_SCORE = 0.5;
 
-    public static final String BEARER_VALUE = "Bearer %s";
-
 }

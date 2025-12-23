@@ -3,6 +3,7 @@ package com.example.aditya_resume_backend.core.service;
 import com.example.aditya_resume_backend.constants.ApplicationConstants;
 import com.example.aditya_resume_backend.constants.EmailConstants;
 import com.example.aditya_resume_backend.core.port.dto.NameEmailDTO;
+import com.example.aditya_resume_backend.core.port.dto.ScheduledMeetingDetailsDTO;
 import com.example.aditya_resume_backend.core.port.dto.UserDTO;
 import com.example.aditya_resume_backend.core.port.service.IEmailService;
 import com.example.aditya_resume_backend.dto.initiate_meet.ScheduleMeetRequest;
@@ -118,9 +119,7 @@ public class EmailServiceImpl implements IEmailService {
 
     @Async
     @Override
-    public void sendConfirmationEmail(List<NameEmailDTO> recipients, String meetLink, LocalDateTime scheduleTime) throws IOException, TemplateException, MessagingException {
-        recipients.add(NameEmailDTO.builder().emailId(adminEmail).build());
-
+    public void sendConfirmationEmail(List<NameEmailDTO> recipients, ScheduledMeetingDetailsDTO scheduledMeeting, LocalDateTime scheduleTime) throws IOException, TemplateException, MessagingException {
         List<String> recipientsEmails = recipients.stream().map(NameEmailDTO::getEmailId).toList();
         List<String> recipientsNames = recipients.stream().map(NameEmailDTO::getFirstName).toList();
 
@@ -128,8 +127,9 @@ public class EmailServiceImpl implements IEmailService {
         StringWriter writer = new StringWriter();
 
         Map<String, Object> model = Map.of(
-                "meeting_link", meetLink,
-                "participants", recipientsNames.stream().filter(Objects::nonNull).collect(Collectors.joining(",")),
+                EmailConstants.MEETING_LINK, scheduledMeeting.getJoinUrl(),
+                EmailConstants.PASSWORD, scheduledMeeting.getPassword(),
+                EmailConstants.PARTICIPANTS, recipientsNames.stream().filter(Objects::nonNull).collect(Collectors.joining(",")),
                 EmailConstants.SCHEDULE_DATE, getDateString(scheduleTime),
                 EmailConstants.SCHEDULE_TIME, getTimeString(scheduleTime)
         );
@@ -141,6 +141,35 @@ public class EmailServiceImpl implements IEmailService {
         helper.setFrom(noreplyEmail);
         helper.setTo(recipientsEmails.toArray(new String[0]));
         helper.setSubject(EmailConstants.ACCEPT_SUBJECT);
+        helper.setText(htmlBody, true);
+
+        javaMailSender.send(message);
+    }
+
+    @Async
+    @Override
+    public void sendConfirmationEmailToAdmin(List<NameEmailDTO> recipients, ScheduledMeetingDetailsDTO scheduledMeeting, LocalDateTime scheduleTime) throws IOException, TemplateException, MessagingException {
+        List<String> recipientsEmails = recipients.stream().map(NameEmailDTO::getEmailId).toList();
+        List<String> recipientsNames = recipients.stream().map(NameEmailDTO::getFirstName).toList();
+
+        Template template = freemarkerConfig.getTemplate(EmailConstants.ACCEPT_TEMPLATE_FILE_ADMIN);
+        StringWriter writer = new StringWriter();
+
+        Map<String, Object> model = Map.of(
+                EmailConstants.MEETING_LINK, scheduledMeeting.getStartUrl(),
+                EmailConstants.PARTICIPANTS, recipientsNames.stream().filter(Objects::nonNull).collect(Collectors.joining(",")),
+                EmailConstants.PARTICIPANTS_EMAILS, recipientsEmails.stream().filter(Objects::nonNull).collect(Collectors.joining(",")),
+                EmailConstants.SCHEDULE_DATE, getDateString(scheduleTime),
+                EmailConstants.SCHEDULE_TIME, getTimeString(scheduleTime)
+        );
+        template.process(model, writer);
+        String htmlBody = writer.toString();
+
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, EmailConstants.DEFAULT_ENCODING);
+        helper.setFrom(noreplyEmail);
+        helper.setTo(adminEmail);
+        helper.setSubject(EmailConstants.ACCEPT_SUBJECT_ADMIN);
         helper.setText(htmlBody, true);
 
         javaMailSender.send(message);

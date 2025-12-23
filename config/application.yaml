@@ -74,6 +74,13 @@ google:
   recaptcha_v3:
     secret_key: ${GOOGLE_RECAPTCHA_V3_SECRET_KEY}
 
+zoom:
+  auth_token_url: https://zoom.us/oauth/token?grant_type=account_credentials&account_id=%s
+  meet_link_url: https://api.zoom.us/v2/users/me/meetings
+  account_id: ${ZOOM_ACCOUNT_ID}
+  client_id: ${ZOOM_CLIENT_ID}
+  client_secret: ${ZOOM_CLIENT_SECRET}
+
 openai:
   api:
     access_token: ${OPENAI_ACCESS_TOKEN}

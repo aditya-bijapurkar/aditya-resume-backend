@@ -1,6 +1,8 @@
 package com.example.aditya_resume_backend.core.service;
 
 import com.example.aditya_resume_backend.constants.ApplicationConstants;
+import com.example.aditya_resume_backend.core.port.dto.MeetingDetailsDTO;
+import com.example.aditya_resume_backend.core.port.dto.ScheduledMeetingDetailsDTO;
 import com.example.aditya_resume_backend.core.port.service.IMeetLinkService;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -20,7 +22,7 @@ import java.time.ZoneId;
 import java.util.*;
 
 @Service
-public class MeetLinkServiceImpl implements IMeetLinkService {
+public class GoogleMeetLinkServiceImpl implements IMeetLinkService {
 
     @Value("${google.calendar_event_scope}")
     private String googleCalendarEventScope;
@@ -48,13 +50,13 @@ public class MeetLinkServiceImpl implements IMeetLinkService {
     }
 
     @Override
-    public String generateGoogleMeetingLink(LocalDateTime dateTime) throws Exception {
-        // hack: hardcoding a static meet link for now, TO BE REMOVED!!
-        // to google meeting links via calendar events we have 2 options
-        //     1. refresh token which has to be manually refreshed
-        //     2. service account which has cost to generate events
+    public ScheduledMeetingDetailsDTO generateMeetingLink(MeetingDetailsDTO meetingDetails) throws Exception {
+        // NO LONGER USING THIS METHOD
+        // to generate google meeting links via calendar events we have 2 options
+        //     1. refresh token -> needs to be refreshed manually on server
+        //     2. service account -> additional cost for having Google Workspace plan
 
-        /* TODO fix this to generate new meeting links via calendar schedule on runtime
+        LocalDateTime dateTime = meetingDetails.getMeetingTime();
         Calendar service = getCalendarService();
         ZoneId ist = ZoneId.of(ApplicationConstants.IST);
 
@@ -93,9 +95,10 @@ public class MeetLinkServiceImpl implements IMeetLinkService {
                     .orElse(null);
         }
 
-        return meetLink;
-        */
-
-        return "https://meet.google.com/sib-obac-xji";
+        return ScheduledMeetingDetailsDTO.builder()
+                .startUrl(meetLink)
+                .joinUrl(meetLink)
+                .build();
     }
+
 }

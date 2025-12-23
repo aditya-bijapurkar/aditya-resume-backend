@@ -7,9 +7,7 @@ import com.example.aditya_resume_backend.core.entity.schedule.Status;
 import com.example.aditya_resume_backend.core.entity.user.UserProfile;
 import com.example.aditya_resume_backend.core.enums.MeetPlatformEnum;
 import com.example.aditya_resume_backend.core.enums.StatusEnum;
-import com.example.aditya_resume_backend.core.port.dto.MeetingEmailsDTO;
-import com.example.aditya_resume_backend.core.port.dto.NameEmailDTO;
-import com.example.aditya_resume_backend.core.port.dto.UserDTO;
+import com.example.aditya_resume_backend.core.port.dto.*;
 import com.example.aditya_resume_backend.core.port.repository.schedule.MeetScheduleRepository;
 import com.example.aditya_resume_backend.core.port.repository.schedule.MeetUserMapRepository;
 import com.example.aditya_resume_backend.core.port.repository.schedule.StatusRepository;
@@ -48,10 +46,10 @@ public class SchedulerServiceImpl implements ISchedulerService {
     @Autowired
     public SchedulerServiceImpl(IEmailService emailService, IUserManagementService userManagementService,
                                 MeetScheduleRepository meetScheduleRepository, MeetUserMapRepository meetUserMapRepository,
-                                StatusRepository statusRepository, IMeetLinkService meetLinkService) {
+                                StatusRepository statusRepository, ZoomMeetLinkServiceImpl zoomMeetLinkService) {
         this.userManagementService = userManagementService;
         this.emailService = emailService;
-        this.meetLinkService = meetLinkService;
+        this.meetLinkService = zoomMeetLinkService;
 
         this.meetScheduleRepository = meetScheduleRepository;
         this.meetUserMapRepository = meetUserMapRepository;
@@ -128,11 +126,14 @@ public class SchedulerServiceImpl implements ISchedulerService {
         );
     }
 
-    private LocalDateTime getMeetScheduledTime(UUID meetingId) {
+    private MeetingDetailsDTO getMeetScheduledTime(UUID meetingId) {
         Optional<MeetSchedule> meetSchedule = meetScheduleRepository.findById(meetingId);
         if(meetSchedule.isPresent()) {
             MeetSchedule meeting = meetSchedule.get();
-            return meeting.getScheduledAt();
+            return MeetingDetailsDTO.builder()
+                    .meetingTime(meeting.getScheduledAt())
+                    .description(meeting.getDescription())
+                    .build();
         }
 
         throw new GenericRuntimeException(String.format("Meeting Id %s not found", meetingId));
@@ -156,6 +157,11 @@ public class SchedulerServiceImpl implements ISchedulerService {
         meetScheduleRepository.saveAll(meetSchedules);
     }
 
+    private void sendConfirmationMails(List<NameEmailDTO> meetingUsersEmail, ScheduledMeetingDetailsDTO scheduledMeeting, MeetingDetailsDTO meetingDetails) throws Exception {
+        emailService.sendConfirmationEmail(meetingUsersEmail, scheduledMeeting, meetingDetails.getMeetingTime());
+        emailService.sendConfirmationEmailToAdmin(meetingUsersEmail, scheduledMeeting, meetingDetails.getMeetingTime());
+    }
+
     private void rejectOtherSimilarMeets(UUID meetingId, LocalDateTime scheduledTime) throws Exception {
         List<MeetingEmailsDTO> otherSimilarMeets = meetScheduleRepository.getOtherSimilarMeets(scheduledTime, meetingId);
 
@@ -173,21 +179,21 @@ public class SchedulerServiceImpl implements ISchedulerService {
 
     @Override
     public void respondToSchedule(UUID meetingId, String response) throws Exception {
-        LocalDateTime scheduleTime = getMeetScheduledTime(meetingId);
+        MeetingDetailsDTO meetingDetails = getMeetScheduledTime(meetingId);
         List<NameEmailDTO> meetingUsersEmail = meetUserMapRepository.getRequiredUsersEmail(meetingId);
 
         if(response.equals(StatusEnum.SCHEDULED.value)) {
-            String meetingLink = meetLinkService.generateGoogleMeetingLink(scheduleTime);
-            updateMeetingStatus(List.of(meetingId), response, meetingLink);
-            emailService.sendConfirmationEmail(meetingUsersEmail, meetingLink, scheduleTime);
+            ScheduledMeetingDetailsDTO scheduledMeeting = meetLinkService.generateMeetingLink(meetingDetails);
+            updateMeetingStatus(List.of(meetingId), response, scheduledMeeting.getJoinUrl());
 
-            rejectOtherSimilarMeets(meetingId, scheduleTime);
+            sendConfirmationMails(meetingUsersEmail, scheduledMeeting, meetingDetails);
+            rejectOtherSimilarMeets(meetingId, meetingDetails.getMeetingTime());
         }
         else {
             updateMeetingStatus(List.of(meetingId), response, null);
             emailService.sendRejectionEmail(
                     meetingUsersEmail.stream().map(NameEmailDTO::getEmailId).toList(),
-                    scheduleTime
+                    meetingDetails.getMeetingTime()
             );
         }
     }

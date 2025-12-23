@@ -1,6 +1,7 @@
 package com.example.aditya_resume_backend.core.port.service;
 
 import com.example.aditya_resume_backend.core.port.dto.NameEmailDTO;
+import com.example.aditya_resume_backend.core.port.dto.ScheduledMeetingDetailsDTO;
 import com.example.aditya_resume_backend.dto.initiate_meet.ScheduleMeetRequest;
 import freemarker.template.TemplateException;
 import jakarta.mail.MessagingException;
@@ -16,7 +17,9 @@ public interface IEmailService {
 
     void sendMeetScheduleEmail(List<String> recipients, LocalDateTime scheduleTime) throws IOException, TemplateException, MessagingException;
 
-    void sendConfirmationEmail(List<NameEmailDTO> recipients, String meetLink, LocalDateTime scheduleTime) throws IOException, TemplateException, MessagingException;
+    void sendConfirmationEmail(List<NameEmailDTO> recipients, ScheduledMeetingDetailsDTO scheduledMeeting, LocalDateTime scheduleTime) throws IOException, TemplateException, MessagingException;
+
+    void sendConfirmationEmailToAdmin(List<NameEmailDTO> recipients, ScheduledMeetingDetailsDTO scheduledMeeting, LocalDateTime scheduleTime) throws IOException, TemplateException, MessagingException;
 
     void sendRejectionEmail(List<String> recipients, LocalDateTime scheduleTime) throws IOException, TemplateException, MessagingException;
 
