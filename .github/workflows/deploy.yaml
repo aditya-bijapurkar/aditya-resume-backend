@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -31,6 +31,7 @@ jobs:
           username: ${{ secrets.INSTANCE_USER }}
           key: ${{ secrets.INSTANCE_KEY }}
           script: |
+            set -e
             cd /home/ubuntu
             sudo rm -f .env-backend
             
@@ -64,13 +65,11 @@ jobs:
             ZOOM_CLIENT_SECRET=${{ secrets.ZOOM_CLIENT_SECRET }}
             EOF'
             
-            echo "restarting the application..."
-            sudo docker compose down || true
-            echo "removing all stopped containers"
-            sudo docker container prune -f || true
-            echo "removing the existing image on the server"
-            sudo docker rmi docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPO }}:latest || true
+            IMAGE=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPO }}:latest
             echo "pulling the latest image from docker hub"
-            sudo docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPO }}:latest
-            echo "restarting the application"
-            sudo docker compose up -d
+            sudo docker pull $IMAGE
+            echo "restarting the backend container..."
+            sudo docker compose up -d backend
+            echo "removing unused image..."
+            sudo docker image prune -f
+            sudo "successfully completed backend restart script!"
