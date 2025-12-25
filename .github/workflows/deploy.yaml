@@ -72,4 +72,4 @@ jobs:
             sudo docker compose up -d backend
             echo "removing unused image..."
             sudo docker image prune -f
-            sudo "successfully completed backend restart script!"
+            echo "successfully completed backend restart script!"
