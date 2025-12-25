@@ -19,4 +19,4 @@ COPY --from=build /app/config ./config
 
 EXPOSE 8080
 
-# DO NOT start the app here — compose will start it
+ENTRYPOINT ["java", "-Xmx256m", "-Xms128m", "-jar", "/app/app.jar"]
