@@ -56,6 +56,7 @@ jobs:
             NOREPLY_EMAIL=${{ secrets.NOREPLY_EMAIL }}
             S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}
             S3_BUCKET_VECTOR_EMBEDDINGS_KEY=${{ secrets.S3_BUCKET_VECTOR_EMBEDDINGS_KEY }}
+            S3_BUCKET_RESUME_KEY=${{ secrets.S3_BUCKET_RESUME_KEY }}
             SMTP_HOST=${{ secrets.SMTP_HOST }}
             SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
             SMTP_PORT=${{ secrets.SMTP_PORT }}

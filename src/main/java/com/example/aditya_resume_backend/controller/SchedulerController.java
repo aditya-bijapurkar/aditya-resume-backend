@@ -66,7 +66,7 @@ public class SchedulerController {
 
     @Time(metricName = "schedule_respond", apiName = "respond")
     @GetMapping("${Routes.schedule.respond}")
-    public ResponseEntity respondToSchedule(
+    public ResponseEntity<Void> respondToSchedule(
         @RequestParam(name = "meetingId") UUID meetingId,
         @RequestParam(name = "response") String response
     ) {

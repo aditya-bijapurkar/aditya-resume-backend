@@ -2,6 +2,7 @@ package com.example.aditya_resume_backend.utils;
 
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
@@ -24,7 +25,7 @@ public class AWSUtils {
                 .build();
     }
 
-    public static String downloadFromS3Bucket(String bucketName, String keyName) {
+    public static String downloadFromS3BucketAsString(String bucketName, String keyName) {
         GetObjectRequest objectRequest = GetObjectRequest.builder()
                 .bucket(bucketName)
                 .key(keyName)
@@ -33,6 +34,15 @@ public class AWSUtils {
         ResponseBytes<GetObjectResponse> objectBytes = getS3Client().getObjectAsBytes(objectRequest);
 
         return new String(objectBytes.asByteArray(), StandardCharsets.UTF_8);
+    }
+
+    public static ResponseInputStream<GetObjectResponse> downloadFromS3BucketAsInputStream(String bucketName, String keyName) {
+        GetObjectRequest objectRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(keyName)
+                .build();
+
+        return getS3Client().getObject(objectRequest);
     }
 
 }

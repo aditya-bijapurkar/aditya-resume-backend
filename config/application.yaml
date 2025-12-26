@@ -64,6 +64,7 @@ aws:
   s3:
     bucket_name: ${S3_BUCKET_NAME}
     vector_embeddings_key: ${S3_BUCKET_VECTOR_EMBEDDINGS_KEY}
+    resume_key: ${S3_BUCKET_RESUME_KEY}
 
 web:
   redirection_location: ${DEFAULT_REDIRECTION_LOCATION}
@@ -96,6 +97,7 @@ RequestMapping:
   schedule: /api/schedule/meet
   contact: /api/contact
   chat: /api/chat
+  resume: /api/resume
 
 Routes:
   schedule:
@@ -108,3 +110,6 @@ Routes:
 
   chat:
     response: /response
+
+  resume:
+    download: /download

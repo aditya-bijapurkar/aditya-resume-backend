@@ -33,7 +33,7 @@ public class RagRetrievalServiceImpl implements IRagRetrievalService  {
     @PostConstruct
     public void loadEmbeddingsFromS3() {
         logger.info("Downloading context file from S3 bucket...");
-        String jsonString = AWSUtils.downloadFromS3Bucket(s3BucketName, vectorEmbeddingsKey);
+        String jsonString = AWSUtils.downloadFromS3BucketAsString(s3BucketName, vectorEmbeddingsKey);
 
         logger.info("Storing context file as local knowledge vector embeddings...");
         documentEmbeddings = EmbeddingUtils.parseStringToDocuments(jsonString);
