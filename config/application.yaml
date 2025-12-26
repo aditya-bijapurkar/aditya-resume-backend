@@ -93,9 +93,9 @@ openai:
 
 ###### API ROUTES ######
 RequestMapping:
-  schedule: /schedule/meet
-  contact: /contact
-  chat: /chat
+  schedule: /api/schedule/meet
+  contact: /api/contact
+  chat: /api/chat
 
 Routes:
   schedule:
