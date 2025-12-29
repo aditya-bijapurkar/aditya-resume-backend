@@ -6,12 +6,12 @@
     <p>Agenda of the meeting: ${description}</p>
     <p>Schedule requested on ${schedule_date}, ${schedule_time} IST</p>
     <p>
-      <a href="https://www.adityabijapurkar.in/schedule/meet/respond?meetingId=${meeting_id}&response=scheduled">
+      <a href="https://www.adityabijapurkar.in/api/schedule/meet/respond?meetingId=${meeting_id}&response=scheduled">
         Click here to Accept
       </a>
     </p>
     <p>
-      <a href="https://www.adityabijapurkar.in/schedule/meet/respond?meetingId=${meeting_id}&response=declined">
+      <a href="https://www.adityabijapurkar.in/api/schedule/meet/respond?meetingId=${meeting_id}&response=declined">
         Click here to Reject
       </a>
     </p>
