@@ -7,11 +7,9 @@ RUN mvn dependency:go-offline -B
 COPY src ./src
 COPY config ./config
 
-RUN mvn clean package -DskipTests \
-    && rm -rf ~/.m2
+RUN mvn clean package -DskipTests && rm -rf ~/.m2
 
-
-FROM eclipse-temurin:17-jdk
+FROM eclipse-temurin:17-jre-jammy
 
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
@@ -19,4 +17,4 @@ COPY --from=build /app/config ./config
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-Xmx256m", "-Xms128m", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-XX:+UseContainerSupport","-XX:MaxRAMPercentage=45.0","-XX:InitialRAMPercentage=25.0","-XX:MaxDirectMemorySize=64m","-XX:MaxMetaspaceSize=64m","-XX:CompressedClassSpaceSize=32m","-XX:+UseSerialGC","-XX:+ExitOnOutOfMemoryError","-Djava.security.egd=file:/dev/./urandom","-jar","/app/app.jar"]
