@@ -18,12 +18,9 @@ import com.example.aditya_resume_backend.core.port.service.IUserManagementServic
 import com.example.aditya_resume_backend.dto.get_availability.ScheduleAvailabilityResponse;
 import com.example.aditya_resume_backend.dto.initiate_meet.ScheduleMeetRequest;
 import com.example.aditya_resume_backend.exceptions.GenericRuntimeException;
-import freemarker.template.TemplateException;
-import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -31,6 +28,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.example.aditya_resume_backend.constants.ControllerConstants.TIMESLOT_ERROR;
 
 @Service
 public class SchedulerServiceImpl implements ISchedulerService {
@@ -112,9 +111,18 @@ public class SchedulerServiceImpl implements ISchedulerService {
         meetUserMapRepository.saveAll(meetUserMaps);
     }
 
+    private Boolean checkIfTimeslotIsAvailable(LocalDateTime timeslot) {
+        return meetScheduleRepository.checkIfTimeslotIsAvailable(timeslot);
+    }
+
     @Override
-    public void initiateMeetingRequest(ScheduleMeetRequest scheduleMeetRequest) throws TemplateException, MessagingException, IOException {
+    public void initiateMeetingRequest(ScheduleMeetRequest scheduleMeetRequest) throws Exception {
         userManagementService.createNewUsers(scheduleMeetRequest.getRequiredUsers());
+
+        Boolean timeslotIsAvailable = checkIfTimeslotIsAvailable(scheduleMeetRequest.getScheduleTime());
+        if(!timeslotIsAvailable) {
+            throw new Exception(TIMESLOT_ERROR);
+        }
 
         UUID meetingId = UUID.randomUUID();
         saveNewMeetingRequest(meetingId, scheduleMeetRequest);
@@ -126,7 +134,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
         );
     }
 
-    private MeetingDetailsDTO getMeetScheduledTime(UUID meetingId) {
+    private MeetingDetailsDTO getMeetingDetails(UUID meetingId) {
         Optional<MeetSchedule> meetSchedule = meetScheduleRepository.findById(meetingId);
         if(meetSchedule.isPresent()) {
             MeetSchedule meeting = meetSchedule.get();
@@ -179,18 +187,19 @@ public class SchedulerServiceImpl implements ISchedulerService {
 
     @Override
     public void respondToSchedule(UUID meetingId, String response) throws Exception {
-        MeetingDetailsDTO meetingDetails = getMeetScheduledTime(meetingId);
-        List<NameEmailDTO> meetingUsersEmail = meetUserMapRepository.getRequiredUsersEmail(meetingId);
+        MeetingDetailsDTO meetingDetails = getMeetingDetails(meetingId);
+        Boolean timeslotIsAvailable = checkIfTimeslotIsAvailable(meetingDetails.getMeetingTime());
 
-        if(response.equals(StatusEnum.SCHEDULED.value)) {
+        List<NameEmailDTO> meetingUsersEmail = meetUserMapRepository.getRequiredUsersEmail(meetingId);
+        if(timeslotIsAvailable && response.equals(StatusEnum.SCHEDULED.value)) {
             ScheduledMeetingDetailsDTO scheduledMeeting = meetLinkService.generateMeetingLink(meetingDetails);
-            updateMeetingStatus(List.of(meetingId), response, scheduledMeeting.getJoinUrl());
+            updateMeetingStatus(List.of(meetingId), StatusEnum.SCHEDULED.value, scheduledMeeting.getJoinUrl());
 
             sendConfirmationMails(meetingUsersEmail, scheduledMeeting, meetingDetails);
             rejectOtherSimilarMeets(meetingId, meetingDetails.getMeetingTime());
         }
         else {
-            updateMeetingStatus(List.of(meetingId), response, null);
+            updateMeetingStatus(List.of(meetingId), StatusEnum.DECLINED.value, null);
             emailService.sendRejectionEmail(
                     meetingUsersEmail.stream().map(NameEmailDTO::getEmailId).toList(),
                     meetingDetails.getMeetingTime()

@@ -107,7 +107,7 @@ public class ChatApiServiceImpl implements IChatApiService {
                 .map(DocumentEmbeddings::getText)
                 .collect(Collectors.joining("\n\n"));
 
-        return String.format(USER_PROMPT_WITH_CONTEXT, contextString, userPrompt);
+        return String.format(USER_PROMPT_WITH_CONTEXT, userPrompt, contextString);
     }
 
     private ChatPromptResponse generateChatModelResponse(String userPrompt, List<DocumentEmbeddings> topKDocuments) throws AiModelException {

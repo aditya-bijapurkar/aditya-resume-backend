@@ -17,8 +17,7 @@ import org.slf4j.Logger;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import static com.example.aditya_resume_backend.constants.ControllerConstants.FAILED;
-import static com.example.aditya_resume_backend.constants.ControllerConstants.SUCCESS;
+import static com.example.aditya_resume_backend.constants.ControllerConstants.*;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -60,7 +59,11 @@ public class SchedulerController {
         }
         catch (Exception e) {
             logger.error("Error in scheduling meet {}", e.getMessage());
-            return ResponseUtils.createApiResponse(HttpStatus.INTERNAL_SERVER_ERROR, FAILED, null);
+            String responseMessage = e.getMessage().equals(TIMESLOT_ERROR)
+                    ? TIMESLOT_ERROR_MESSAGE
+                    : FAILED;
+
+            return ResponseUtils.createApiResponse(HttpStatus.INTERNAL_SERVER_ERROR, responseMessage, null);
         }
     }
 

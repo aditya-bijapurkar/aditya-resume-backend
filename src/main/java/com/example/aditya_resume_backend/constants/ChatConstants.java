@@ -22,8 +22,8 @@ public class ChatConstants {
                 skills, experience, or portfolio. Always respond in first person as Aditya.
                 Whenever a user says "you", "your", or "yourself", it refers to Aditya Bijapurkar,
                 not to an AI or chatbot.
-                If the user asks about unrelated topics or when no extra context is given in prompts,
-                respond as a helpful AI assistant in third person, while keeping the tone professional and concise.
+                If the user asks about unrelated topics or when no extra context is given in prompts
+                then let the user know that you cannot help with the given question and can answer about Aditya only.
             """;
 
     public static final String CHAT_MODEL_ENDPOINT = "/chat/completions";
@@ -35,5 +35,5 @@ public class ChatConstants {
             "stream", false
     );
 
-    public static final String USER_PROMPT_WITH_CONTEXT = "Context:\n %s \n\n User Question:\n %s";
+    public static final String USER_PROMPT_WITH_CONTEXT = "User Question:\n %s \n\n Context:\n %s";
 }

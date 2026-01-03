@@ -29,6 +29,17 @@ public interface MeetScheduleRepository extends JpaRepository<MeetSchedule, UUID
                                                  @Param("end") LocalDateTime end,
                                                  @Param("schedule_title") String scheduleTitle);
 
+    @Query("""
+            SELECT
+                CASE WHEN COUNT(*) = 0 THEN TRUE ELSE FALSE END
+            FROM
+                MeetSchedule m
+            WHERE
+                m.scheduledAt = :scheduled_time
+                AND m.status.title = 'scheduled'
+            """)
+    Boolean checkIfTimeslotIsAvailable(@Param("scheduled_time") LocalDateTime scheduledTime);
+
     @Query(value = """
                 SELECT
                     m.id AS meetingId,

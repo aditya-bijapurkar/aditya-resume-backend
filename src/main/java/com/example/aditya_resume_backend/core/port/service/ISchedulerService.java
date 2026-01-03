@@ -13,7 +13,7 @@ public interface ISchedulerService {
 
     ScheduleAvailabilityResponse getAvailableSlots(LocalDate date);
 
-    void initiateMeetingRequest(ScheduleMeetRequest scheduleMeetRequest) throws TemplateException, MessagingException, IOException;
+    void initiateMeetingRequest(ScheduleMeetRequest scheduleMeetRequest) throws Exception;
 
     void respondToSchedule(UUID meetingId, String response) throws Exception;
 
