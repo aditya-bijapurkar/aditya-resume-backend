@@ -39,4 +39,6 @@ public class MeetSchedule {
     @JoinColumn(name = "meet_status_id", referencedColumnName = "id")
     Status status;
 
+    @Column(name = "meet_password")
+    String meetPassword;
 }

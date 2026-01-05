@@ -152,7 +152,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
         throw new GenericRuntimeException(String.format("Meeting Id %s not found", meetingId));
     }
 
-    private void updateMeetingStatus(List<UUID> meetingIds, String response, String meetingLink) {
+    private void updateMeetingStatus(List<UUID> meetingIds, String response, String meetingLink, String meetPassword) {
         List<MeetSchedule> meetSchedules = meetScheduleRepository.findByIdIn(meetingIds);
         Status updatedStatus = statusRepository.findByTitle(StatusEnum.getEnumFromString(response).value);
 
@@ -162,6 +162,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
             }
 
             schedule.setStatus(updatedStatus);
+            schedule.setMeetPassword(meetPassword);
             if(meetingLink != null && !meetingLink.isEmpty()) {
                 schedule.setMeetLink(meetingLink);
             }
@@ -181,6 +182,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
         updateMeetingStatus(
                 otherSimilarMeets.stream().map(MeetingEmailsDTO::getMeetingId).toList(),
                 StatusEnum.DECLINED.value,
+                null,
                 null
         );
 
@@ -198,13 +200,13 @@ public class SchedulerServiceImpl implements ISchedulerService {
         List<NameEmailDTO> meetingUsersEmail = meetUserMapRepository.getRequiredUsersEmail(meetingId);
         if(timeslotIsAvailable && response.equals(StatusEnum.SCHEDULED.value)) {
             ScheduledMeetingDetailsDTO scheduledMeeting = meetLinkService.generateMeetingLink(meetingDetails);
-            updateMeetingStatus(List.of(meetingId), StatusEnum.SCHEDULED.value, scheduledMeeting.getJoinUrl());
+            updateMeetingStatus(List.of(meetingId), StatusEnum.SCHEDULED.value, scheduledMeeting.getJoinUrl(), scheduledMeeting.getPassword());
 
             sendConfirmationMails(meetingUsersEmail, scheduledMeeting, meetingDetails);
             rejectOtherSimilarMeets(meetingId, meetingDetails.getMeetingTime());
         }
         else {
-            updateMeetingStatus(List.of(meetingId), StatusEnum.DECLINED.value, null);
+            updateMeetingStatus(List.of(meetingId), StatusEnum.DECLINED.value, null, null);
             emailService.sendRejectionEmail(
                     meetingUsersEmail.stream().map(NameEmailDTO::getEmailId).toList(),
                     meetingDetails.getMeetingTime()
