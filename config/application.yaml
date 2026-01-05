@@ -66,6 +66,9 @@ aws:
     vector_embeddings_key: ${S3_BUCKET_VECTOR_EMBEDDINGS_KEY}
     resume_key: ${S3_BUCKET_RESUME_KEY}
 
+jwt:
+  secret: ${JWT_SECRET}
+
 web:
   redirection_location: ${DEFAULT_REDIRECTION_LOCATION}
 
@@ -104,6 +107,7 @@ Routes:
     availability: /availability
     initiate: /initiate
     respond: /respond
+    fetch: /fetch
 
   contact:
     send: /send

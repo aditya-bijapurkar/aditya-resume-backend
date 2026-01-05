@@ -16,6 +16,7 @@ import com.example.aditya_resume_backend.core.port.service.IMeetLinkService;
 import com.example.aditya_resume_backend.core.port.service.ISchedulerService;
 import com.example.aditya_resume_backend.core.port.service.IUserManagementService;
 import com.example.aditya_resume_backend.dto.get_availability.ScheduleAvailabilityResponse;
+import com.example.aditya_resume_backend.dto.initiate_meet.ScheduleList;
 import com.example.aditya_resume_backend.dto.initiate_meet.ScheduleMeetRequest;
 import com.example.aditya_resume_backend.exceptions.GenericRuntimeException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -212,6 +213,13 @@ public class SchedulerServiceImpl implements ISchedulerService {
                     meetingDetails.getMeetingTime()
             );
         }
+    }
+
+    @Override
+    public ScheduleList getScheduledList(String emailId) {
+        return ScheduleList.builder()
+                .scheduleList(meetUserMapRepository.fetchScheduleListForUser(emailId))
+                .build();
     }
 
 }

@@ -4,8 +4,10 @@ import com.example.aditya_resume_backend.annotations.Time;
 import com.example.aditya_resume_backend.core.port.service.ISchedulerService;
 import com.example.aditya_resume_backend.dto.ApiResponse;
 import com.example.aditya_resume_backend.dto.get_availability.ScheduleAvailabilityResponse;
+import com.example.aditya_resume_backend.dto.initiate_meet.ScheduleList;
 import com.example.aditya_resume_backend.dto.initiate_meet.ScheduleMeetRequest;
 import com.example.aditya_resume_backend.utils.ResponseUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -80,6 +82,23 @@ public class SchedulerController {
         catch (Exception e) {
             logger.error("Exception occurred in accepting meet {}", e.getMessage());
             return null;
+        }
+    }
+
+    @Time(metricName = "fetch_list", apiName = "fetch")
+    @GetMapping("${Routes.schedule.fetch}")
+    public ResponseEntity<ApiResponse<ScheduleList>> fetchScheduleList(
+        HttpServletRequest request
+    ) {
+        try {
+            String email = (String) request.getAttribute("email");
+            ScheduleList scheduleList = schedulerService.getScheduledList(email);
+
+            return ResponseUtils.createApiResponse(HttpStatus.OK, SUCCESS, scheduleList);
+        }
+        catch (Exception e) {
+            logger.error("Error in fetching scheduled called list {}", e.getMessage());
+            return ResponseUtils.createApiResponse(HttpStatus.INTERNAL_SERVER_ERROR, FAILED, null);
         }
     }
 

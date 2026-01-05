@@ -2,6 +2,7 @@ package com.example.aditya_resume_backend.core.port.repository.schedule;
 
 import com.example.aditya_resume_backend.core.entity.schedule.MeetUserMap;
 import com.example.aditya_resume_backend.core.port.dto.NameEmailDTO;
+import com.example.aditya_resume_backend.dto.initiate_meet.Schedule;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,5 +24,20 @@ public interface MeetUserMapRepository extends JpaRepository<MeetUserMap, UUID> 
                 m.meetSchedule.id = :meeting_id
             """)
     List<NameEmailDTO> getRequiredUsersEmail(@Param("meeting_id") UUID meetingId);
+
+    @Query("""
+            SELECT
+                m.meetSchedule.scheduledAt,
+                m.meetSchedule.description,
+                m.meetSchedule.meetPlatform,
+                m.meetSchedule.meetLink,
+                m.meetSchedule.meetPassword,
+                m.meetSchedule.status.title
+            FROM
+                MeetUserMap m
+            WHERE
+                m.userProfile.emailId = :email_id
+            """)
+    List<Schedule> fetchScheduleListForUser(@Param("email_id") String emailId);
 
 }

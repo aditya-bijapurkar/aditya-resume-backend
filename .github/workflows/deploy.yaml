@@ -49,6 +49,7 @@ jobs:
             DEFAULT_REDIRECTION_LOCATION=${{ secrets.DEFAULT_REDIRECTION_LOCATION }}
             GOOGLE_ACCESS_KEY_BASE64=${{ secrets.GOOGLE_ACCESS_KEY_BASE64 }}
             GOOGLE_RECAPTCHA_V3_SECRET_KEY=${{ secrets.GOOGLE_RECAPTCHA_V3_SECRET_KEY }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
             OPENAI_ACCESS_TOKEN=${{ secrets.OPENAI_ACCESS_TOKEN }}
             OPENAI_BASE_URL=${{ secrets.OPENAI_BASE_URL }}
             OPENAI_CHAT_MODEL=${{ secrets.OPENAI_CHAT_MODEL }}
