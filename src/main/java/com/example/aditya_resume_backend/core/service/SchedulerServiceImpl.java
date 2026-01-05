@@ -19,6 +19,7 @@ import com.example.aditya_resume_backend.dto.get_availability.ScheduleAvailabili
 import com.example.aditya_resume_backend.dto.initiate_meet.ScheduleMeetRequest;
 import com.example.aditya_resume_backend.exceptions.GenericRuntimeException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -33,6 +34,9 @@ import static com.example.aditya_resume_backend.constants.ControllerConstants.TI
 
 @Service
 public class SchedulerServiceImpl implements ISchedulerService {
+
+    @Value("${spring.mail.admin-email}")
+    private String adminEmail;
 
     private final IUserManagementService userManagementService;
     private final IEmailService emailService;
@@ -83,9 +87,10 @@ public class SchedulerServiceImpl implements ISchedulerService {
     }
 
     private void saveNewMeetingRequest(UUID meetingId, ScheduleMeetRequest scheduleMeetRequest) {
-        List<UserProfile> requiredUsers = userManagementService.getUsersFromEmail(
-                scheduleMeetRequest.getRequiredUsers().stream().map(UserDTO::getEmailId).toList()
-        );
+        List<String> emailIds = new ArrayList<>(scheduleMeetRequest.getRequiredUsers().stream().map(UserDTO::getEmailId).toList());
+        emailIds.add(adminEmail);
+
+        List<UserProfile> requiredUsers = userManagementService.getUsersFromEmail(emailIds);
 
         MeetSchedule meetSchedule = MeetSchedule.builder()
                 .id(meetingId)
