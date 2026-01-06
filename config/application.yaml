@@ -59,6 +59,10 @@ spring:
     baseline-on-migrate: true
     baseline-version: 1
 
+cors:
+  allowed:
+    origins: ${ALLOWED_ORIGIN}
+
 aws:
   region: ${AWS_REGION}
   s3:

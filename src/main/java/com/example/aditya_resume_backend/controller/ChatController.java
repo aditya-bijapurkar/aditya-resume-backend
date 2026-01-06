@@ -25,8 +25,8 @@ public class ChatController {
     private final IChatApiService chatApiService;
 
     @Autowired
-    public ChatController(IChatApiService huggingFaceService) {
-        this.chatApiService = huggingFaceService;
+    public ChatController(IChatApiService chatApiService) {
+        this.chatApiService = chatApiService;
     }
 
     @PostMapping("${Routes.chat.response}")

@@ -1,6 +1,7 @@
 package com.example.aditya_resume_backend.controller;
 
 import com.example.aditya_resume_backend.annotations.Time;
+import com.example.aditya_resume_backend.constants.EmailConstants;
 import com.example.aditya_resume_backend.core.port.service.ISchedulerService;
 import com.example.aditya_resume_backend.dto.ApiResponse;
 import com.example.aditya_resume_backend.dto.get_availability.ScheduleAvailabilityResponse;
@@ -91,7 +92,7 @@ public class SchedulerController {
         HttpServletRequest request
     ) {
         try {
-            String email = (String) request.getAttribute("email");
+            String email = (String) request.getAttribute(EmailConstants.EMAIL);
             ScheduleList scheduleList = schedulerService.getScheduledList(email);
 
             return ResponseUtils.createApiResponse(HttpStatus.OK, SUCCESS, scheduleList);

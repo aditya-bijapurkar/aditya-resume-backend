@@ -1,25 +1,46 @@
 package com.example.aditya_resume_backend.config.filters;
 
-import com.example.aditya_resume_backend.utils.JWTUtils;
+import com.example.aditya_resume_backend.constants.EmailConstants;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
+@Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
 
-    private final JWTUtils jwtUtils;
+    private static final String ISSUER = "auth-service";
 
-    public JwtAuthFilter(JWTUtils jwtUtils) {
-        this.jwtUtils = jwtUtils;
+    private final SecretKey secretKey;
+
+    public JwtAuthFilter(@Value("${jwt.secret}") String jwtSecret) {
+        this.secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private Claims validateAndGetClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .requireIssuer(ISSUER)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     @Override
@@ -28,6 +49,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         HttpServletResponse response,
         FilterChain filterChain
     ) throws ServletException, IOException {
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -37,17 +63,29 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
 
         try {
-            Claims claims = jwtUtils.validateAndGetClaims(token);
+            Claims claims = validateAndGetClaims(token);
 
-            request.setAttribute("email", claims.get("email", String.class));
+            String email = claims.get(EmailConstants.EMAIL, String.class);
+
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(email,null, Collections.emptyList());
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            request.setAttribute(EmailConstants.EMAIL, email);
         }
         catch (Exception e) {
+            logger.error("JWT validation failed", e);
             logger.error(e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return !request.getRequestURI().startsWith("/api/schedule/meet/fetch");
     }
 
 }
