@@ -173,7 +173,10 @@ public class SchedulerServiceImpl implements ISchedulerService {
     }
 
     private void sendConfirmationMails(List<NameEmailDTO> meetingUsersEmail, ScheduledMeetingDetailsDTO scheduledMeeting, MeetingDetailsDTO meetingDetails) throws Exception {
-        emailService.sendConfirmationEmail(meetingUsersEmail, scheduledMeeting, meetingDetails.getMeetingTime());
+        emailService.sendConfirmationEmail(
+                meetingUsersEmail.stream().filter(nameEmailDTO -> !adminEmail.equals(nameEmailDTO.getEmailId())).toList(),
+                scheduledMeeting, meetingDetails.getMeetingTime());
+
         emailService.sendConfirmationEmailToAdmin(meetingUsersEmail, scheduledMeeting, meetingDetails.getMeetingTime());
     }
 
@@ -188,7 +191,8 @@ public class SchedulerServiceImpl implements ISchedulerService {
         );
 
         for(MeetingEmailsDTO meetingEmails : otherSimilarMeets) {
-            List<String> emailIds = Arrays.stream(meetingEmails.getEmailIdsString().split(",")).toList();
+            List<String> emailIds = Arrays.stream(meetingEmails.getEmailIdsString().split(","))
+                    .filter(email -> !adminEmail.equals(email)).toList();
             emailService.sendRejectionEmail(emailIds, scheduledTime);
         }
     }
@@ -209,7 +213,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
         else {
             updateMeetingStatus(List.of(meetingId), StatusEnum.DECLINED.value, null, null);
             emailService.sendRejectionEmail(
-                    meetingUsersEmail.stream().map(NameEmailDTO::getEmailId).toList(),
+                    meetingUsersEmail.stream().map(NameEmailDTO::getEmailId).filter(email -> !adminEmail.equals(email)).toList(),
                     meetingDetails.getMeetingTime()
             );
         }
