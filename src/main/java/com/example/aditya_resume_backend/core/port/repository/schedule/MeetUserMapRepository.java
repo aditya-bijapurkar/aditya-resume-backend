@@ -37,6 +37,8 @@ public interface MeetUserMapRepository extends JpaRepository<MeetUserMap, UUID> 
                 MeetUserMap m
             WHERE
                 m.userProfile.emailId = :email_id
+            ORDER BY
+                m.meetSchedule.scheduledAt
             """)
     List<Schedule> fetchScheduleListForUser(@Param("email_id") String emailId);
 

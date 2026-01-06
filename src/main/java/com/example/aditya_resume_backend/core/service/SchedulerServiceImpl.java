@@ -98,7 +98,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
                 .description(scheduleMeetRequest.getDescription())
                 .createdAt(LocalDateTime.now())
                 .scheduledAt(scheduleMeetRequest.getScheduleTime())
-                .meetPlatform(MeetPlatformEnum.GOOGLE_MEET.getValue())
+                .meetPlatform(MeetPlatformEnum.ZOOM_MEET.getValue())
                 .status(statusRepository.findByTitle(StatusEnum.PENDING_APPROVAL.getValue()))
                 .build();
 
