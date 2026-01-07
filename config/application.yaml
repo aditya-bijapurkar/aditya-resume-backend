@@ -102,7 +102,7 @@ openai:
     chat_model: ${OPENAI_CHAT_MODEL}
     embedding_model: ${OPENAI_EMBEDDING_MODEL}
   retrieval:
-    topK: 3
+    topK: 5
     threshold: 0.4
 
 ###### API ROUTES ######
