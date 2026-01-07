@@ -16,7 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.Map;
@@ -34,7 +34,7 @@ public class ChatApiServiceImpl implements IChatApiService {
     @Value("${openai.api.embedding_model}")
     private String openaiEmbeddingModel;
 
-    private final WebClient webClient;
+    private final RestClient restClient;
     private final IRagRetrievalService ragRetrievalService;
 
     @Autowired
@@ -45,7 +45,7 @@ public class ChatApiServiceImpl implements IChatApiService {
     ) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setBearerAuth(openaiAccessToken);
-        this.webClient = WebClient.builder()
+        this.restClient = RestClient.builder()
                 .baseUrl(openaiBaseUrl)
                 .defaultHeaders(headers -> headers.addAll(httpHeaders))
                 .build();
@@ -74,16 +74,18 @@ public class ChatApiServiceImpl implements IChatApiService {
 
             logger.info("Sending user prompt to OpenAi for embedding: {}...", userPrompt);
 
-            VectorEmbeddingResponse vectorEmbedding = webClient.post()
+            VectorEmbeddingResponse vectorEmbedding = restClient.post()
                     .uri(EMBEDDING_MODEL_ENDPOINT)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(requestBody)
+                    .body(requestBody)
                     .retrieve()
-                    .onStatus(HttpStatusCode::isError, response ->
-                            response.bodyToMono(String.class).map(body -> new RuntimeException("OpenAI embeddings API error: " + body))
-                    )
-                    .bodyToMono(VectorEmbeddingResponse.class)
-                    .block();
+                    .onStatus(HttpStatusCode::isError, (request, response) -> {
+                        String errorBody = response.getBody().readAllBytes() != null
+                                ? new String(response.getBody().readAllBytes())
+                                : "unknown error";
+                        throw new RuntimeException("OpenAI embeddings API error: " + errorBody);
+                    })
+                    .body(VectorEmbeddingResponse.class);
 
             logger.info("Successfully fetched OpenAi embeddings from API response!");
 
@@ -121,16 +123,18 @@ public class ChatApiServiceImpl implements IChatApiService {
                     userPrompt
             );
 
-            OpenApiResponseDTO modelResponse = webClient.post()
+            OpenApiResponseDTO modelResponse = restClient.post()
                     .uri(CHAT_MODEL_ENDPOINT)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(requestBody)
+                    .body(requestBody)
                     .retrieve()
-                    .onStatus(HttpStatusCode::isError, response ->
-                            response.bodyToMono(String.class).map(body -> new RuntimeException("OpenAI chat API error: " + body))
-                    )
-                    .bodyToMono(OpenApiResponseDTO.class)
-                    .block();
+                    .onStatus(HttpStatusCode::isError, (request, response) -> {
+                        String errorBody = response.getBody().readAllBytes() != null
+                                ? new String(response.getBody().readAllBytes())
+                                : "unknown error";
+                        throw new RuntimeException("OpenAI embeddings API error: " + errorBody);
+                    })
+                    .body(OpenApiResponseDTO.class);
 
             logger.info("Successfully fetched OpenAi chat bot's response!");
 

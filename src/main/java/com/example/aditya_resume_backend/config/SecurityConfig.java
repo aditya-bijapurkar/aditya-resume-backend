@@ -59,7 +59,7 @@ public class SecurityConfig {
                 List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
         );
         configuration.setAllowedHeaders(
-                List.of("Authorization", "Content-Type")
+                List.of("Authorization", "Content-Type", "x-recaptcha-v3-token")
         );
         configuration.setExposedHeaders(
                 List.of("Authorization")

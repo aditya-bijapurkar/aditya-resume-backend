@@ -59,6 +59,12 @@ spring:
     baseline-on-migrate: true
     baseline-version: 1
 
+  aop:
+    proxy-target-class: false
+
+  jmx:
+    enabled: false
+
 cors:
   allowed:
     origins: ${ALLOWED_ORIGIN}

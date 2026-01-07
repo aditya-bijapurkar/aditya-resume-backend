@@ -17,4 +17,4 @@ COPY --from=build /app/config ./config
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=45.0", "-XX:InitialRAMPercentage=25.0", "-XX:MaxMetaspaceSize=128m", "-XX:CompressedClassSpaceSize=32m", "-XX:MaxDirectMemorySize=64m", "-XX:+UseSerialGC", "-XX:+ExitOnOutOfMemoryError", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=35.0", "-XX:InitialRAMPercentage=20.0", "-XX:MaxMetaspaceSize=160m", "-XX:CompressedClassSpaceSize=32m", "-XX:MaxDirectMemorySize=32m", "-XX:+UseG1GC", "-XX:+ExitOnOutOfMemoryError", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app/app.jar"]

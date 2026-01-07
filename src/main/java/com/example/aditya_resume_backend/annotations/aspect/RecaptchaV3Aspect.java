@@ -13,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClient;
 
 import java.util.List;
 
@@ -24,7 +26,7 @@ public class RecaptchaV3Aspect {
     private static final Logger logger = LoggerFactory.getLogger(RecaptchaV3Aspect.class);
 
     private final HttpServletRequest httpServletRequest;
-    private static final WebClient webClient = WebClient.create();
+    private final RestClient restClient;
 
     @Value("${google.recaptcha_v3.secret_key}")
     private String secret;
@@ -32,13 +34,14 @@ public class RecaptchaV3Aspect {
     @Autowired
     public RecaptchaV3Aspect(HttpServletRequest httpServletRequest) {
         this.httpServletRequest = httpServletRequest;
+        this.restClient = RestClient.builder().build();
     }
 
-    private String getBodyRecaptchaBody(RecaptchaRequest request) {
-        return String.format("secret=%s&response=%s",
-                request.secret(),
-                request.token()
-        );
+    private MultiValueMap<String, String> getBodyRecaptchaBody(RecaptchaRequest request) {
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("secret", request.secret());
+        body.add("response", request.token());
+        return body;
     }
 
     @Before("within(@org.springframework.web.bind.annotation.RestController *)")
@@ -50,13 +53,12 @@ public class RecaptchaV3Aspect {
             logger.info("Verifying human interaction using reCAPTCHA V3 before {}...", methodName);
             RecaptchaRequest request = new RecaptchaRequest(secret, token);
 
-            RecaptchaResponse response = webClient.post()
+            RecaptchaResponse response = restClient.post()
                     .uri(ControllerConstants.RECAPTCHA_VERIFY_URL)
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                    .bodyValue(getBodyRecaptchaBody(request))
+                    .body(getBodyRecaptchaBody(request))
                     .retrieve()
-                    .bodyToMono(RecaptchaResponse.class)
-                    .block();
+                    .body(RecaptchaResponse.class);
 
             if(
                 response == null
