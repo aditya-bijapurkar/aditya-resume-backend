@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -26,7 +27,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
 
-    private static final String ISSUER = "auth-service";
+    private static final String AUTH_COOKIE_NAME = "go_auth_token";
+    private static final String ISSUER = "auth_service";
+    private static final String AUTH_EMAIL = "auth_email";
 
     private final SecretKey secretKey;
 
@@ -43,6 +46,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 .getPayload();
     }
 
+    private String extractTokenFromCookies(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if(cookies == null) return null;
+
+        for(Cookie cookie : cookies) {
+            if(cookie.getName().equals(AUTH_COOKIE_NAME)) {
+                return cookie.getValue();
+            }
+        }
+
+        return null;
+    }
+
     @Override
     protected void doFilterInternal(
         HttpServletRequest request,
@@ -54,30 +70,25 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-        }
+        String token = extractTokenFromCookies(request);
+        if(token != null && !token.isEmpty()) {
+            try {
+                Claims claims = validateAndGetClaims(token);
 
-        String token = authHeader.substring(7);
+                String email = claims.get(AUTH_EMAIL, String.class);
 
-        try {
-            Claims claims = validateAndGetClaims(token);
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(email,null, Collections.emptyList());
 
-            String email = claims.get(EmailConstants.EMAIL, String.class);
-
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(email,null, Collections.emptyList());
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            request.setAttribute(EmailConstants.EMAIL, email);
-        }
-        catch (Exception e) {
-            logger.error("JWT validation failed", e);
-            logger.error(e.getMessage());
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                request.setAttribute(EmailConstants.EMAIL, email);
+            }
+            catch (Exception e) {
+                logger.error("JWT validation failed", e);
+                logger.error(e.getMessage());
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
         }
 
         filterChain.doFilter(request, response);

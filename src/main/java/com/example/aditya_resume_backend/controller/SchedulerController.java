@@ -93,6 +93,11 @@ public class SchedulerController {
     ) {
         try {
             String email = (String) request.getAttribute(EmailConstants.EMAIL);
+            if(email == null || email.isEmpty()) {
+                logger.info("Cannot fetch calls, could not get email_id from auth token");
+                return ResponseUtils.createApiResponse(HttpStatus.FORBIDDEN, FAILED, null);
+            }
+
             ScheduleList scheduleList = schedulerService.getScheduledList(email);
 
             return ResponseUtils.createApiResponse(HttpStatus.OK, SUCCESS, scheduleList);
