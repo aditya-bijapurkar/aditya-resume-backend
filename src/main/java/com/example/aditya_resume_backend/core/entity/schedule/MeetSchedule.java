@@ -29,16 +29,19 @@ public class MeetSchedule {
     @Column(name = "scheduled_at")
     LocalDateTime scheduledAt;
 
+    @Column(name = "meet_platform")
+    String meetPlatform;
+
     @Column(name = "meet_link")
     String meetLink;
 
-    @Column(name = "meet_platform")
-    String meetPlatform;
+    @Column(name = "meet_password")
+    String meetPassword;
 
     @ManyToOne(targetEntity = Status.class, fetch = FetchType.EAGER, cascade = {})
     @JoinColumn(name = "meet_status_id", referencedColumnName = "id")
     Status status;
 
-    @Column(name = "meet_password")
-    String meetPassword;
+    @Column(name = "attendee_emails")
+    String[] attendeeEmails;
 }

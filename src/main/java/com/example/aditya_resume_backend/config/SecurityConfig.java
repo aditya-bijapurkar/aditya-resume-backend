@@ -51,6 +51,9 @@ public class SecurityConfig {
     @Value("${cors.allowed.origins}")
     private String allowedOrigin;
 
+    @Value("${cors.allowed.credentials}")
+    private Boolean allowCredentials;
+
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -65,7 +68,7 @@ public class SecurityConfig {
                 List.of("Authorization")
         );
 
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(allowCredentials);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

@@ -2,19 +2,16 @@ package com.example.aditya_resume_backend.core.service;
 
 import com.example.aditya_resume_backend.constants.ApplicationConstants;
 import com.example.aditya_resume_backend.core.entity.schedule.MeetSchedule;
-import com.example.aditya_resume_backend.core.entity.schedule.MeetUserMap;
 import com.example.aditya_resume_backend.core.entity.schedule.Status;
-import com.example.aditya_resume_backend.core.entity.user.UserProfile;
 import com.example.aditya_resume_backend.core.enums.MeetPlatformEnum;
 import com.example.aditya_resume_backend.core.enums.StatusEnum;
 import com.example.aditya_resume_backend.core.port.dto.*;
 import com.example.aditya_resume_backend.core.port.repository.schedule.MeetScheduleRepository;
-import com.example.aditya_resume_backend.core.port.repository.schedule.MeetUserMapRepository;
 import com.example.aditya_resume_backend.core.port.repository.schedule.StatusRepository;
 import com.example.aditya_resume_backend.core.port.service.IEmailService;
 import com.example.aditya_resume_backend.core.port.service.IMeetLinkService;
 import com.example.aditya_resume_backend.core.port.service.ISchedulerService;
-import com.example.aditya_resume_backend.core.port.service.IUserManagementService;
+import com.example.aditya_resume_backend.core.service.meet.ZoomMeetLinkServiceImpl;
 import com.example.aditya_resume_backend.dto.get_availability.ScheduleAvailabilityResponse;
 import com.example.aditya_resume_backend.dto.initiate_meet.ScheduleList;
 import com.example.aditya_resume_backend.dto.initiate_meet.ScheduleMeetRequest;
@@ -39,24 +36,19 @@ public class SchedulerServiceImpl implements ISchedulerService {
     @Value("${spring.mail.admin-email}")
     private String adminEmail;
 
-    private final IUserManagementService userManagementService;
     private final IEmailService emailService;
     private final IMeetLinkService meetLinkService;
 
     private final MeetScheduleRepository meetScheduleRepository;
-    private final MeetUserMapRepository meetUserMapRepository;
     private final StatusRepository statusRepository;
 
     @Autowired
-    public SchedulerServiceImpl(IEmailService emailService, IUserManagementService userManagementService,
-                                MeetScheduleRepository meetScheduleRepository, MeetUserMapRepository meetUserMapRepository,
+    public SchedulerServiceImpl(IEmailService emailService, MeetScheduleRepository meetScheduleRepository,
                                 StatusRepository statusRepository, ZoomMeetLinkServiceImpl zoomMeetLinkService) {
-        this.userManagementService = userManagementService;
         this.emailService = emailService;
         this.meetLinkService = zoomMeetLinkService;
 
         this.meetScheduleRepository = meetScheduleRepository;
-        this.meetUserMapRepository = meetUserMapRepository;
         this.statusRepository = statusRepository;
     }
 
@@ -88,33 +80,19 @@ public class SchedulerServiceImpl implements ISchedulerService {
     }
 
     private void saveNewMeetingRequest(UUID meetingId, ScheduleMeetRequest scheduleMeetRequest) {
-        List<String> emailIds = new ArrayList<>(scheduleMeetRequest.getRequiredUsers().stream().map(UserDTO::getEmailId).toList());
-        emailIds.add(adminEmail);
-
-        List<UserProfile> requiredUsers = userManagementService.getUsersFromEmail(emailIds);
-
-        MeetSchedule meetSchedule = MeetSchedule.builder()
+        meetScheduleRepository.save(
+            MeetSchedule.builder()
                 .id(meetingId)
                 .description(scheduleMeetRequest.getDescription())
                 .createdAt(LocalDateTime.now())
                 .scheduledAt(scheduleMeetRequest.getScheduleTime())
                 .meetPlatform(MeetPlatformEnum.ZOOM_MEET.getValue())
                 .status(statusRepository.findByTitle(StatusEnum.PENDING_APPROVAL.getValue()))
-                .build();
-
-        List<MeetUserMap> meetUserMaps = new ArrayList<>();
-        for(UserProfile user : requiredUsers) {
-            meetUserMaps.add(
-                    MeetUserMap.builder()
-                            .id(UUID.randomUUID())
-                            .meetSchedule(meetSchedule)
-                            .userProfile(user)
-                            .build()
-            );
-        }
-
-        meetScheduleRepository.save(meetSchedule);
-        meetUserMapRepository.saveAll(meetUserMaps);
+                .attendeeEmails(
+                    scheduleMeetRequest.getRequiredUsers().stream().map(UserDTO::getEmailId).toArray(String[]::new)
+                )
+                .build()
+        );
     }
 
     private Boolean checkIfTimeslotIsAvailable(LocalDateTime timeslot) {
@@ -123,7 +101,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
 
     @Override
     public void initiateMeetingRequest(ScheduleMeetRequest scheduleMeetRequest) throws Exception {
-        userManagementService.createNewUsers(scheduleMeetRequest.getRequiredUsers());
+//        userManagementService.createNewUsers(scheduleMeetRequest.getRequiredUsers());
 
         Boolean timeslotIsAvailable = checkIfTimeslotIsAvailable(scheduleMeetRequest.getScheduleTime());
         if(!timeslotIsAvailable) {
@@ -147,6 +125,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
             return MeetingDetailsDTO.builder()
                     .meetingTime(meeting.getScheduledAt())
                     .description(meeting.getDescription())
+                    .attendeeEmails(meeting.getAttendeeEmails())
                     .build();
         }
 
@@ -172,12 +151,9 @@ public class SchedulerServiceImpl implements ISchedulerService {
         meetScheduleRepository.saveAll(meetSchedules);
     }
 
-    private void sendConfirmationMails(List<NameEmailDTO> meetingUsersEmail, ScheduledMeetingDetailsDTO scheduledMeeting, MeetingDetailsDTO meetingDetails) throws Exception {
-        emailService.sendConfirmationEmail(
-                meetingUsersEmail.stream().filter(nameEmailDTO -> !adminEmail.equals(nameEmailDTO.getEmailId())).toList(),
-                scheduledMeeting, meetingDetails.getMeetingTime());
-
-        emailService.sendConfirmationEmailToAdmin(meetingUsersEmail, scheduledMeeting, meetingDetails.getMeetingTime());
+    private void sendConfirmationMails(String[] attendeeEmails, ScheduledMeetingDetailsDTO scheduledMeeting, MeetingDetailsDTO meetingDetails) throws Exception {
+        emailService.sendConfirmationEmail(attendeeEmails, scheduledMeeting, meetingDetails.getMeetingTime());
+        emailService.sendConfirmationEmailToAdmin(attendeeEmails, scheduledMeeting, meetingDetails.getMeetingTime());
     }
 
     private void rejectOtherSimilarMeets(UUID meetingId, LocalDateTime scheduledTime) throws Exception {
@@ -191,9 +167,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
         );
 
         for(MeetingEmailsDTO meetingEmails : otherSimilarMeets) {
-            List<String> emailIds = Arrays.stream(meetingEmails.getEmailIdsString().split(","))
-                    .filter(email -> !adminEmail.equals(email)).toList();
-            emailService.sendRejectionEmail(emailIds, scheduledTime);
+            emailService.sendRejectionEmail(meetingEmails.getAttendeeEmails(), scheduledTime);
         }
     }
 
@@ -202,27 +176,23 @@ public class SchedulerServiceImpl implements ISchedulerService {
         MeetingDetailsDTO meetingDetails = getMeetingDetails(meetingId);
         Boolean timeslotIsAvailable = checkIfTimeslotIsAvailable(meetingDetails.getMeetingTime());
 
-        List<NameEmailDTO> meetingUsersEmail = meetUserMapRepository.getRequiredUsersEmail(meetingId);
         if(timeslotIsAvailable && response.equals(StatusEnum.SCHEDULED.value)) {
             ScheduledMeetingDetailsDTO scheduledMeeting = meetLinkService.generateMeetingLink(meetingDetails);
             updateMeetingStatus(List.of(meetingId), StatusEnum.SCHEDULED.value, scheduledMeeting.getJoinUrl(), scheduledMeeting.getPassword());
 
-            sendConfirmationMails(meetingUsersEmail, scheduledMeeting, meetingDetails);
+            sendConfirmationMails(meetingDetails.getAttendeeEmails(), scheduledMeeting, meetingDetails);
             rejectOtherSimilarMeets(meetingId, meetingDetails.getMeetingTime());
         }
         else {
             updateMeetingStatus(List.of(meetingId), StatusEnum.DECLINED.value, null, null);
-            emailService.sendRejectionEmail(
-                    meetingUsersEmail.stream().map(NameEmailDTO::getEmailId).filter(email -> !adminEmail.equals(email)).toList(),
-                    meetingDetails.getMeetingTime()
-            );
+            emailService.sendRejectionEmail(meetingDetails.getAttendeeEmails(), meetingDetails.getMeetingTime());
         }
     }
 
     @Override
     public ScheduleList getScheduledList(String emailId) {
         return ScheduleList.builder()
-                .scheduleList(meetUserMapRepository.fetchScheduleListForUser(emailId))
+                .scheduleList(meetScheduleRepository.fetchScheduleListForUser(emailId))
                 .build();
     }
 

@@ -2,7 +2,6 @@ package com.example.aditya_resume_backend.core.service;
 
 import com.example.aditya_resume_backend.constants.ApplicationConstants;
 import com.example.aditya_resume_backend.constants.EmailConstants;
-import com.example.aditya_resume_backend.core.port.dto.NameEmailDTO;
 import com.example.aditya_resume_backend.core.port.dto.ScheduledMeetingDetailsDTO;
 import com.example.aditya_resume_backend.core.port.dto.UserDTO;
 import com.example.aditya_resume_backend.core.port.service.IEmailService;
@@ -25,10 +24,7 @@ import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -119,17 +115,13 @@ public class EmailServiceImpl implements IEmailService {
 
     @Async
     @Override
-    public void sendConfirmationEmail(List<NameEmailDTO> recipients, ScheduledMeetingDetailsDTO scheduledMeeting, LocalDateTime scheduleTime) throws IOException, TemplateException, MessagingException {
-        List<String> recipientsEmails = recipients.stream().map(NameEmailDTO::getEmailId).toList();
-        List<String> recipientsNames = recipients.stream().map(NameEmailDTO::getFirstName).toList();
-
+    public void sendConfirmationEmail(String[] attendeeEmails, ScheduledMeetingDetailsDTO scheduledMeeting, LocalDateTime scheduleTime) throws IOException, TemplateException, MessagingException {
         Template template = freemarkerConfig.getTemplate(EmailConstants.ACCEPT_TEMPLATE_FILE);
         StringWriter writer = new StringWriter();
 
         Map<String, Object> model = Map.of(
                 EmailConstants.MEETING_LINK, scheduledMeeting.getJoinUrl(),
                 EmailConstants.PASSWORD, scheduledMeeting.getPassword(),
-                EmailConstants.PARTICIPANTS, recipientsNames.stream().filter(Objects::nonNull).collect(Collectors.joining(",")),
                 EmailConstants.SCHEDULE_DATE, getDateString(scheduleTime),
                 EmailConstants.SCHEDULE_TIME, getTimeString(scheduleTime)
         );
@@ -139,7 +131,7 @@ public class EmailServiceImpl implements IEmailService {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, EmailConstants.DEFAULT_ENCODING);
         helper.setFrom(noreplyEmail);
-        helper.setTo(recipientsEmails.toArray(new String[0]));
+        helper.setTo(attendeeEmails);
         helper.setSubject(EmailConstants.ACCEPT_SUBJECT);
         helper.setText(htmlBody, true);
 
@@ -148,17 +140,13 @@ public class EmailServiceImpl implements IEmailService {
 
     @Async
     @Override
-    public void sendConfirmationEmailToAdmin(List<NameEmailDTO> recipients, ScheduledMeetingDetailsDTO scheduledMeeting, LocalDateTime scheduleTime) throws IOException, TemplateException, MessagingException {
-        List<String> recipientsEmails = recipients.stream().map(NameEmailDTO::getEmailId).toList();
-        List<String> recipientsNames = recipients.stream().map(NameEmailDTO::getFirstName).toList();
-
+    public void sendConfirmationEmailToAdmin(String[] attendeeEmails, ScheduledMeetingDetailsDTO scheduledMeeting, LocalDateTime scheduleTime) throws IOException, TemplateException, MessagingException {
         Template template = freemarkerConfig.getTemplate(EmailConstants.ACCEPT_TEMPLATE_FILE_ADMIN);
         StringWriter writer = new StringWriter();
 
         Map<String, Object> model = Map.of(
                 EmailConstants.MEETING_LINK, scheduledMeeting.getStartUrl(),
-                EmailConstants.PARTICIPANTS, recipientsNames.stream().filter(Objects::nonNull).collect(Collectors.joining(",")),
-                EmailConstants.PARTICIPANTS_EMAILS, recipientsEmails.stream().filter(Objects::nonNull).collect(Collectors.joining(",")),
+                EmailConstants.PARTICIPANTS_EMAILS, Arrays.stream(attendeeEmails).filter(Objects::nonNull).collect(Collectors.joining(",")),
                 EmailConstants.SCHEDULE_DATE, getDateString(scheduleTime),
                 EmailConstants.SCHEDULE_TIME, getTimeString(scheduleTime)
         );
@@ -177,7 +165,7 @@ public class EmailServiceImpl implements IEmailService {
 
     @Async
     @Override
-    public void sendRejectionEmail(List<String> recipients, LocalDateTime scheduleTime) throws IOException, TemplateException, MessagingException {
+    public void sendRejectionEmail(String[] attendeeEmails, LocalDateTime scheduleTime) throws IOException, TemplateException, MessagingException {
         Template template = freemarkerConfig.getTemplate(EmailConstants.REJECT_TEMPLATE_FILE);
         StringWriter writer = new StringWriter();
 
@@ -191,7 +179,7 @@ public class EmailServiceImpl implements IEmailService {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, EmailConstants.DEFAULT_ENCODING);
         helper.setFrom(noreplyEmail);
-        helper.setTo(recipients.toArray(new String[0]));
+        helper.setTo(attendeeEmails);
         helper.setSubject(EmailConstants.REJECT_SUBJECT);
         helper.setText(htmlBody, true);
 

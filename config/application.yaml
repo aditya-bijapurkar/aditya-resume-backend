@@ -68,6 +68,7 @@ spring:
 cors:
   allowed:
     origins: ${ALLOWED_ORIGIN}
+    credentials: ${ALLOW_CREDENTIALS:true}
 
 aws:
   region: ${AWS_REGION}

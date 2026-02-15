@@ -1,4 +1,4 @@
-package com.example.aditya_resume_backend.core.service;
+package com.example.aditya_resume_backend.core.service.meet;
 
 import com.example.aditya_resume_backend.constants.ApplicationConstants;
 import com.example.aditya_resume_backend.core.port.dto.MeetingDetailsDTO;

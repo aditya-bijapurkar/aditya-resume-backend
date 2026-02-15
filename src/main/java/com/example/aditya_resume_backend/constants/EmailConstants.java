@@ -11,7 +11,6 @@ public class EmailConstants {
     public static final String EMAIL = "email";
     public static final String MEETING_LINK = "meeting_link";
     public static final String PASSWORD = "password";
-    public static final String PARTICIPANTS = "participants";
     public static final String PARTICIPANTS_EMAILS = "participants_emails";
     public static final String SCHEDULE_TIME = "schedule_time";
     public static final String SCHEDULE_DATE = "schedule_date";

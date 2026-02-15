@@ -10,4 +10,5 @@ import java.time.LocalDateTime;
 public class MeetingDetailsDTO {
     LocalDateTime meetingTime;
     String description;
+    String[] attendeeEmails;
 }
